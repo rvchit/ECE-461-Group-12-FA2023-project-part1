@@ -1,2 +1,1 @@
-Rohit Kamath
-Ty Runner
+Rohit Kamath, Rachit Bisht, Ty Runner
