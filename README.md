@@ -1,1 +1,1 @@
-Rohit Kamath, Rachit Bisht, Ty Runner
+Rohit Kamath, Rachit Bisht, Robert Rozhanskyy, Ty Runner
