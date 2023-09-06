@@ -10,11 +10,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node-fetch": "^2.6.4",
+    "@types/strip-bom": "^4.0.1",
+    "@types/strip-json-comments": "^3.0.0",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "node-fetch": "^2.7.0"
   }
 }
