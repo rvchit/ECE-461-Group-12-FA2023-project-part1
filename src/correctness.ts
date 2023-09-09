@@ -18,7 +18,7 @@ async function fetchGitHubData(fullRepoUrl: string, endpoint: string): Promise<a
     const repoUrl = repoUrlMatch[1];
     const apiUrl = `https://api.github.com/${endpoint.replace('OWNER/REPO', repoUrl)}`;
 
-    //console.log('Constructed API URL:', apiUrl);
+    //console.log('Constructed API URL:', apiUrl); 
 
     const response = await fetch(apiUrl, {
         headers: {

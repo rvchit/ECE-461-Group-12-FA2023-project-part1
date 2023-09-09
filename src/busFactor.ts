@@ -21,7 +21,7 @@ async function fetchContributors(fullRepoUrl: string): Promise<Contributor[]> {
 
     const repoUrl = repoUrlMatch[1];
     const apiUrl = `https://api.github.com/repos/${repoUrl}/contributors`;
-    //console.log('Constructed API URL:', apiUrl);
+    //console.log('Constructed API URL:', apiUrl); 
     
     const response = await fetch(apiUrl, {
         headers: {
