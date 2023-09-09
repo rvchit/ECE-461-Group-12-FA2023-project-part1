@@ -1,5 +1,7 @@
 import fetch from 'node-fetch';
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
+import fs from 'fs';
+
 dotenv.config();
 
 interface Contributor {
@@ -9,16 +11,21 @@ interface Contributor {
 
 interface BusFactorResult {
     busFactor: number;
-    majorContributors: Contributor[];
-    totalContributors: number;
 }
 
-async function fetchContributors(repoUrl: string): Promise<Contributor[]> {
+async function fetchContributors(fullRepoUrl: string): Promise<Contributor[]> {
+    const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
+    if (!repoUrlMatch) {
+        throw new Error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
+    }
+
+    const repoUrl = repoUrlMatch[1];
     const apiUrl = `https://api.github.com/repos/${repoUrl}/contributors`;
-    console.log('Constructed API URL:', apiUrl);
+    //console.log('Constructed API URL:', apiUrl);
+    
     const response = await fetch(apiUrl, {
         headers: {
-            'Authorization': `Bearer ${process.env.GITHUB_API_TOKEN}`,
+            'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
             'Accept': 'application/vnd.github.v3+json'
         }
     });
@@ -29,7 +36,7 @@ async function fetchContributors(repoUrl: string): Promise<Contributor[]> {
 
     const data = await response.json();
     
-    if (!Array.isArray(data) || !data.every(d => 'login' in d && 'contributions' in d)) { //checking if data is in an array and if data has login & contribution property
+    if (!Array.isArray(data) || !data.every(d => 'login' in d && 'contributions' in d)) {
         throw new Error('Expected an array of contributors but received a different type.');
     }
 
@@ -52,26 +59,35 @@ function calculateBusFactor(contributors: Contributor[]): BusFactorResult {
         }
     }
 
-    const busFactor = majorContributorsCount / sortedContributors.length;
+    const busFactor = Math.min(majorContributorsCount / 10, 1);
 
     return {
         busFactor,
-        majorContributors: sortedContributors.slice(0, majorContributorsCount),
-        totalContributors: sortedContributors.length
     };
 }
 
-async function getBusFactor(repoUrl: string): Promise<BusFactorResult> {
+async function writeDataToFile(data: BusFactorResult, filePath: string): Promise<void> {
+    const ndjson = JSON.stringify(data) + '\n';
+    return fs.promises.writeFile(filePath, ndjson, { flag: 'a' });
+}
+
+export async function getBusFactor(repoUrl: string): Promise<BusFactorResult> {
     const contributors = await fetchContributors(repoUrl);
     return calculateBusFactor(contributors);
 }
 
-const GITHUB_TOKEN = process.env.GITHUB_API_TOKEN;
-async function printBusFactorForRepo() {
-    const repoUrl = 'netdata/netdata';
-    const result = await getBusFactor(repoUrl);
 
-    console.log(result);
+
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+async function printBusFactorForRepo() {
+    const repoUrl = 'https://github.com/netdata/netdata';
+    try {
+        const result = await getBusFactor(repoUrl);
+        await writeDataToFile(result, 'busfactorout.ndjson')
+        //console.log('Data written to output.ndjson');
+    } catch (error) {
+        console.error('Error fetching bus factor:', error);
+    }
 }
 
 printBusFactorForRepo();
