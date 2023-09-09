@@ -55,15 +55,15 @@ function parseDate(dateString) {
     return new Date(dateString);
 }
 function fetchClosedPullRequests(owner, repo, accessToken, maxCount, page) {
-    if (maxCount === void 0) { maxCount = 300; }
+    if (maxCount === void 0) { maxCount = 50; }
     if (page === void 0) { page = 1; }
     return __awaiter(this, void 0, void 0, function () {
         var perPage, apiUrl, response, closedPullRequests, totalCount, nextPageClosedPullRequests;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    perPage = 100;
-                    apiUrl = "https://api.github.com/repos/".concat(owner, "/").concat(repo, "/pulls?state=closed&page=").concat(page, "&per_page=").concat(perPage);
+                    perPage = 50;
+                    apiUrl = "https://api.github.com/repos/".concat(owner, "/").concat(repo, "/issues?state=closed&page=").concat(page, "&per_page=").concat(perPage);
                     return [4 /*yield*/, (0, node_fetch_1.default)(apiUrl, {
                             headers: {
                                 Authorization: "Bearer ".concat(accessToken),
@@ -95,7 +95,7 @@ function fetchClosedPullRequestData(owner, repo, accessToken, pullRequestNumber)
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    apiUrl = "https://api.github.com/repos/".concat(owner, "/").concat(repo, "/pulls/").concat(pullRequestNumber);
+                    apiUrl = "https://api.github.com/repos/".concat(owner, "/").concat(repo, "/issues/").concat(pullRequestNumber);
                     return [4 /*yield*/, (0, node_fetch_1.default)(apiUrl, {
                             headers: {
                                 Authorization: "Bearer ".concat(accessToken),
@@ -140,7 +140,6 @@ fetchClosedPullRequests(owner, repo, accessToken)
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                console.log('Closed Pull Requests:');
                 _i = 0, closedPullRequests_1 = closedPullRequests;
                 _a.label = 1;
             case 1:
@@ -150,18 +149,17 @@ fetchClosedPullRequests(owner, repo, accessToken)
             case 2:
                 pullRequestData = _a.sent();
                 created = parseDate(pr.created_at);
+                console.log(pr.created_at);
                 closed_1 = parseDate(pullRequestData.closed_at);
-                diff = (closed_1.valueOf() - created.valueOf()) / (ms_to_sec * 3600 * 24);
+                diff = (closed_1.valueOf() - created.valueOf()) / (ms_to_sec * sec_to_hour * 24);
                 score_list.push(diff);
                 _a.label = 3;
             case 3:
                 _i++;
                 return [3 /*break*/, 1];
             case 4:
-                console.log("Scores: ".concat(score_list));
                 median = findMedian(score_list);
                 console.log("Median:", median);
-                console.log("Length:", score_list.length);
                 return [2 /*return*/];
         }
     });

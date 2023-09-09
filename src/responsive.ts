@@ -8,9 +8,9 @@ dotenv.config();
 function parseDate(dateString){
     return new Date(dateString);
 }
-async function fetchClosedPullRequests(owner: string, repo: string, accessToken: string, maxCount: number = 300, page: number = 1): Promise<any[]> {
-    const perPage = 100; // Number of pull requests per page (maximum allowed by GitHub)
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&page=${page}&per_page=${perPage}`;
+async function fetchClosedPullRequests(owner: string, repo: string, accessToken: string, maxCount: number = 50, page: number = 1): Promise<any[]> {
+    const perPage = 50; // Number of pull requests per page (maximum allowed by GitHub)
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed&page=${page}&per_page=${perPage}`;
   
     const response = await fetch(apiUrl, {
       headers: {
@@ -25,7 +25,7 @@ async function fetchClosedPullRequests(owner: string, repo: string, accessToken:
   
     const closedPullRequests = await response.json();
     const totalCount = closedPullRequests.length;
-    //this loop is to fetch 300 entires because each page only has 100 entries
+    //this loop is to fetch 100 entries
     if ((closedPullRequests.length === perPage) && (totalCount < maxCount)) {
       const nextPageClosedPullRequests = await fetchClosedPullRequests(owner, repo, accessToken, maxCount - totalCount, page + 1);
       return [...closedPullRequests, ...nextPageClosedPullRequests];
@@ -34,7 +34,7 @@ async function fetchClosedPullRequests(owner: string, repo: string, accessToken:
   }
   
   async function fetchClosedPullRequestData(owner: string, repo: string, accessToken: string, pullRequestNumber: number): Promise<any> {
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullRequestNumber}`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues/${pullRequestNumber}`;
   
     const response = await fetch(apiUrl, {
       headers: {
@@ -73,18 +73,18 @@ async function fetchClosedPullRequests(owner: string, repo: string, accessToken:
   const score_list: number[] = [];
   fetchClosedPullRequests(owner, repo, accessToken)
     .then(async (closedPullRequests) => {
-      console.log('Closed Pull Requests:');
+      //console.log('Closed Issues:');
       for (const pr of closedPullRequests) {
         const pullRequestData = await fetchClosedPullRequestData(owner, repo, accessToken, pr.number);
         const created = parseDate(pr.created_at);
         const closed = parseDate(pullRequestData.closed_at);
-        const diff = (closed.valueOf()-created.valueOf())/(ms_to_sec*3600*24); //get rid of magic numbers MEASURES IN Days
+        const diff = (closed.valueOf()-created.valueOf())/(ms_to_sec*sec_to_hour*24); //get rid of magic numbers MEASURES IN Days
         score_list.push(diff);
       }
-      console.log(`Scores: ${score_list}`);
+      //console.log(`Scores: ${score_list}`);
       const median = findMedian(score_list);
       console.log("Median:", median);
-      console.log("Length:", score_list.length)
+      //console.log("Length:", score_list.length)
     })
     .catch((error) => {
       console.error('Error fetching closed pull requests:', error);
