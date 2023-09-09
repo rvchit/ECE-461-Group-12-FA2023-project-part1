@@ -67,17 +67,11 @@ async function fetchCorrectnessData(repoUrl: string): Promise<CorrectnessResult>
     }
 }
 
-async function writeDataToFile(data: CorrectnessResult, filePath: string): Promise<void> {
-    const ndjson = JSON.stringify(data) + '\n';
-    return fs.promises.writeFile(filePath, ndjson, { flag: 'a' });
-}
-
 async function  printCorrectnessForRepo() {
     const repoUrl = 'https://github.com/wolever/parameterized';
     try {
         const result = await fetchCorrectnessData(repoUrl);
-        await writeDataToFile(result, 'correctnessout.ndjson');
-        //console.log('Data written to correctnessout.ndjson');
+        console.log('Correctness score:', result.correctnessScore);
     } catch (error) {
         console.error('An error occurred:', error);
     }

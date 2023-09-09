@@ -66,11 +66,6 @@ function calculateBusFactor(contributors: Contributor[]): BusFactorResult {
     };
 }
 
-async function writeDataToFile(data: BusFactorResult, filePath: string): Promise<void> {
-    const ndjson = JSON.stringify(data) + '\n';
-    return fs.promises.writeFile(filePath, ndjson, { flag: 'a' });
-}
-
 export async function getBusFactor(repoUrl: string): Promise<BusFactorResult> {
     const contributors = await fetchContributors(repoUrl);
     return calculateBusFactor(contributors);
@@ -83,8 +78,7 @@ async function printBusFactorForRepo() {
     const repoUrl = 'https://github.com/netdata/netdata';
     try {
         const result = await getBusFactor(repoUrl);
-        await writeDataToFile(result, 'busfactorout.ndjson')
-        //console.log('Data written to output.ndjson');
+        console.log('Bus factor:', result.busFactor);
     } catch (error) {
         console.error('Error fetching bus factor:', error);
     }
