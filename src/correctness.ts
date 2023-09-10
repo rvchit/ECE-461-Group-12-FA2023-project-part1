@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
-import fs from 'fs';
+
 
 dotenv.config();
 
@@ -34,7 +34,7 @@ async function fetchGitHubData(fullRepoUrl: string, endpoint: string): Promise<a
     return await response.json();
 }
 
-async function fetchCorrectnessData(repoUrl: string): Promise<CorrectnessResult> {
+export async function fetchCorrectnessData(repoUrl: string): Promise<CorrectnessResult> {
     try {
         const repoUrlMatch = repoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
         if (!repoUrlMatch) {
