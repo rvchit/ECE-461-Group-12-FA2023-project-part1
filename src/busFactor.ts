@@ -71,10 +71,7 @@ export async function getBusFactor(repoUrl: string): Promise<BusFactorResult> {
     return calculateBusFactor(contributors);
 }
 
-
-
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-async function printBusFactorForRepo() {
+/*async function printBusFactorForRepo() {
     const repoUrl = 'https://github.com/netdata/netdata';
     try {
         const result = await getBusFactor(repoUrl);
@@ -84,4 +81,5 @@ async function printBusFactorForRepo() {
     }
 }
 
-printBusFactorForRepo();
+printBusFactorForRepo(); 
+*/

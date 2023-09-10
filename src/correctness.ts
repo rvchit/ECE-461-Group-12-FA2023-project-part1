@@ -67,8 +67,8 @@ export async function fetchCorrectnessData(repoUrl: string): Promise<Correctness
     }
 }
 
-async function  printCorrectnessForRepo() {
-    const repoUrl = 'https://github.com/wolever/parameterized';
+/*async function  printCorrectnessForRepo() {
+    const repoUrl = 'https://github.com/netdata/netdata';
     try {
         const result = await fetchCorrectnessData(repoUrl);
         console.log('Correctness score:', result.correctnessScore);
@@ -78,3 +78,4 @@ async function  printCorrectnessForRepo() {
 }
 
 printCorrectnessForRepo();
+*/
