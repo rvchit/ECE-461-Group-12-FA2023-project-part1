@@ -5,9 +5,11 @@ const ms_to_sec: number = 1000;
 const sec_to_hour: number = 3600;
 const hours_to_days: number = 24;
 
+//Changes date ticket to an actual data object to calc the difference in terms of milliseconds between created date and closed date
 function parseDate(dateString: any){
     return new Date(dateString);
 }
+//Grabs the 50 most recent closed issues from GitHub API
 async function fetchIssues(owner: string, repo: string): Promise<any[]> {
     const perPage = 50; // Number of pull requests per page (maximum allowed by GitHub)
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed&page=1&per_page=${perPage}`;
@@ -24,7 +26,7 @@ async function fetchIssues(owner: string, repo: string): Promise<any[]> {
     const closedIssues = await response.json();
     return closedIssues;
   }
-  
+  //Fetches issue data of a specified issue number
   async function fetchIssueData(owner: string, repo: string, issueNumber: number): Promise<any> {
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`;
     const response = await fetch(apiUrl, {
@@ -41,6 +43,7 @@ async function fetchIssues(owner: string, repo: string): Promise<any[]> {
   
     return issueData;
   }
+  //Finds the median of the time taken to close an issue, over 50 samples
   function findMedian(numbers: any) {
     // Step 1: Sort the list
     const sortedNumbers = numbers.slice().sort((a: any, b: any) => a - b);
@@ -57,6 +60,7 @@ async function fetchIssues(owner: string, repo: string): Promise<any[]> {
       return sortedNumbers[middleIndex];
     }
   }
+  //
   async function responsive(url: string): Promise<number> {
     const urlParts = url.split("/");
     const repo: string = urlParts.pop()!;
@@ -74,8 +78,16 @@ async function fetchIssues(owner: string, repo: string): Promise<any[]> {
             score_list.push(diff);
         }
         const median = findMedian(score_list);
-        return median;
-    } catch (error) {
+        if (median < 1) {
+          return 1;
+        } else if (median > 7) {
+          return 0;
+        } else {
+          // linear interpolation here.
+          return 1 - (median - 1) / 6;
+        }
+      }
+       catch (error) {
         console.error('Error:', error);
         throw error; // Re-throw the error to be caught by the caller
     }
