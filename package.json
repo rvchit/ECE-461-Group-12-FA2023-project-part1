@@ -4,15 +4,12 @@
   "description": "Rohit Kamath",
   "main": "index.js",
   "scripts": {
-    "preset": "ts-jest",
-    "test": "jest",
-    "testEnvironment": "node"
+    "test": "jest --coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/babel__core": "^7.20.1",
     "@types/jest": "^29.5.4",
     "@types/node-fetch": "^2.6.4",
     "@types/strip-bom": "^4.0.1",
@@ -26,5 +23,9 @@
   "dependencies": {
     "dotenv": "^16.3.1",
     "node-fetch": "^2.7.0"
-  }
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  }  
 }
