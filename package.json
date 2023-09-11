@@ -21,11 +21,6 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "dotenv": "^16.3.1",
-    "node-fetch": "^2.7.0"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node"
+    "dotenv": "^16.3.1"
   }
 }
