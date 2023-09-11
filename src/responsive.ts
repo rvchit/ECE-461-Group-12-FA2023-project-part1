@@ -1,21 +1,19 @@
-"use strict";
 import fetch from 'node-fetch';
 const dotenv = require('dotenv');
+dotenv.config();
 const ms_to_sec: number = 1000;
 const sec_to_hour: number = 3600;
-// Load environment variables from .env file
-dotenv.config();
-function parseDate(dateString){
+const hours_to_days: number = 24;
+
+function parseDate(dateString: any){
     return new Date(dateString);
 }
-async function fetchClosedPullRequests(owner: string, repo: string, accessToken: string, maxCount: number = 50, page: number = 1): Promise<any[]> {
+async function fetchIssues(owner: string, repo: string): Promise<any[]> {
     const perPage = 50; // Number of pull requests per page (maximum allowed by GitHub)
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed&page=${page}&per_page=${perPage}`;
-  
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed&page=1&per_page=${perPage}`;
     const response = await fetch(apiUrl, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'User-Agent': 'GitHub-Pull-Request-Fetcher',
+        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
       },
     });
   
@@ -23,23 +21,15 @@ async function fetchClosedPullRequests(owner: string, repo: string, accessToken:
       throw new Error(`GitHub API request failed: ${response.statusText}`);
     }
   
-    const closedPullRequests = await response.json();
-    const totalCount = closedPullRequests.length;
-    //this loop is to fetch 100 entries
-    if ((closedPullRequests.length === perPage) && (totalCount < maxCount)) {
-      const nextPageClosedPullRequests = await fetchClosedPullRequests(owner, repo, accessToken, maxCount - totalCount, page + 1);
-      return [...closedPullRequests, ...nextPageClosedPullRequests];
-    }
-    return closedPullRequests;
+    const closedIssues = await response.json();
+    return closedIssues;
   }
   
-  async function fetchClosedPullRequestData(owner: string, repo: string, accessToken: string, pullRequestNumber: number): Promise<any> {
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues/${pullRequestNumber}`;
-  
+  async function fetchIssueData(owner: string, repo: string, issueNumber: number): Promise<any> {
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`;
     const response = await fetch(apiUrl, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'User-Agent': 'GitHub-Pull-Request-Fetcher',
+        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
       },
     });
   
@@ -47,13 +37,13 @@ async function fetchClosedPullRequests(owner: string, repo: string, accessToken:
       throw new Error(`GitHub API request failed: ${response.statusText}`);
     }
   
-    const pullRequestData = await response.json();
+    const issueData = await response.json();
   
-    return pullRequestData;
+    return issueData;
   }
-  function findMedian(numbers) {
+  function findMedian(numbers: any) {
     // Step 1: Sort the list
-    const sortedNumbers = numbers.slice().sort((a, b) => a - b);
+    const sortedNumbers = numbers.slice().sort((a: any, b: any) => a - b);
   
     const middleIndex = Math.floor(sortedNumbers.length / 2);
   
@@ -67,25 +57,29 @@ async function fetchClosedPullRequests(owner: string, repo: string, accessToken:
       return sortedNumbers[middleIndex];
     }
   }
-  const owner = 'browserify';
-  const repo = 'browserify';
-  const accessToken = process.env.GITHUB_TOKEN || '';
-  const score_list: number[] = [];
-  fetchClosedPullRequests(owner, repo, accessToken)
-    .then(async (closedPullRequests) => {
-      //console.log('Closed Issues:');
-      for (const pr of closedPullRequests) {
-        const pullRequestData = await fetchClosedPullRequestData(owner, repo, accessToken, pr.number);
-        const created = parseDate(pr.created_at);
-        const closed = parseDate(pullRequestData.closed_at);
-        const diff = (closed.valueOf()-created.valueOf())/(ms_to_sec*sec_to_hour*24); //get rid of magic numbers MEASURES IN Days
-        score_list.push(diff);
-      }
-      //console.log(`Scores: ${score_list}`);
-      const median = findMedian(score_list);
-      console.log("Median:", median);
-      //console.log("Length:", score_list.length)
-    })
-    .catch((error) => {
-      console.error('Error fetching closed pull requests:', error);
-    });
+  async function responsive(url: string): Promise<number> {
+    const urlParts = url.split("/");
+    const repo: string = urlParts.pop()!;
+    const owner: string = urlParts.pop()!;
+    const score_list: number[] = [];
+
+    try {
+        const issues = await fetchIssues(owner, repo);
+
+        for (const issue of issues) {
+            const issueData = await fetchIssueData(owner, repo, issue.number);
+            const created = parseDate(issue.created_at);
+            const closed = parseDate(issueData.closed_at);
+            const diff = (closed.valueOf() - created.valueOf()) / (ms_to_sec * sec_to_hour * hours_to_days); // diff measured in days
+            score_list.push(diff);
+        }
+        const median = findMedian(score_list);
+        return median;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error; // Re-throw the error to be caught by the caller
+    }
+  }
+  export { responsive };
+  
+  
