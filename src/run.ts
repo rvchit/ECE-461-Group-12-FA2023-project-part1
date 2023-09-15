@@ -39,7 +39,7 @@ program
                 const rampUpScore = await rampUp(url);
                 const correctnessScore = await fetchCorrectnessData(url);
                 const netScore = licenseScore * ((responsiveScore * 0.3) + (busFactor * 0.4) + (correctnessScore * 0.15) + (rampUpScore * 0.15));
-                console.log(`{"URL":"${newUrl}", "NET_SCORE":${netScore.toFixed(1)}, "RAMP_UP_SCORE":${rampUpScore.toFixed(1)}, "CORRECTNESS_SCORE":${correctnessScore.toFixed(1)}, "BUS_FACTOR_SCORE":${busFactor.toFixed(1)}, "RESPONSIVE_MAINTAINER_SCORE":${responsiveScore.toFixed(1)}, "LICENSE_SCORE":${licenseScore.toFixed(1)}}`);
+                console.log(`{"URL":"${newUrl}", "NET_SCORE":${netScore.toFixed(5)}, "RAMP_UP_SCORE":${rampUpScore.toFixed(5)}, "CORRECTNESS_SCORE":${correctnessScore.toFixed(5)}, "BUS_FACTOR_SCORE":${busFactor.toFixed(5)}, "RESPONSIVE_MAINTAINER_SCORE":${responsiveScore.toFixed(5)}, "LICENSE_SCORE":${licenseScore.toFixed(5)}}`);
             }
         } catch (error) {
             console.error(error);
