@@ -7,3 +7,4 @@ package.json
 prettier.config.js
 README.md
 tsconfig.json
+*.js
