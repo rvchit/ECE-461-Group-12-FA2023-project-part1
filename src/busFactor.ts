@@ -9,10 +9,6 @@ interface Contributor {
     contributions: number;
 }
 
-interface BusFactorResult {
-    busFactor: number;
-}
-
 async function fetchContributors(fullRepoUrl: string): Promise<Contributor[]> {
     const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
     if (!repoUrlMatch) {
@@ -43,7 +39,7 @@ async function fetchContributors(fullRepoUrl: string): Promise<Contributor[]> {
     return data.map(item => ({ login: item.login, contributions: item.contributions }));
 }
 
-function calculateBusFactor(contributors: Contributor[]): BusFactorResult {
+function calculateBusFactor(contributors: Contributor[]): number {
     const sortedContributors = [...contributors].sort((a, b) => b.contributions - a.contributions);
 
     let majorContributorsCount = 0;
@@ -61,12 +57,10 @@ function calculateBusFactor(contributors: Contributor[]): BusFactorResult {
 
     const busFactor = Math.min(majorContributorsCount / 10, 1);
 
-    return {
-        busFactor,
-    };
+    return busFactor;
 }
 
-export async function getBusFactor(repoUrl: string): Promise<BusFactorResult> {
+export async function getBusFactor(repoUrl: string): Promise<number> {
     const contributors = await fetchContributors(repoUrl);
     return calculateBusFactor(contributors);
 }

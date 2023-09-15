@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-const dotenv = require('dotenv');
+import dotenv from "dotenv";
 dotenv.config();
 const ms_to_sec: number = 1000;
 const sec_to_hour: number = 3600;

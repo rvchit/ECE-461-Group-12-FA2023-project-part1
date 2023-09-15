@@ -6,6 +6,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.license = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -28,8 +29,4 @@ async function license(url) {
     const hasLicense = licenseRegex.test(readme);
     return hasLicense ? 1 : 0;
 }
-async function printLicenseRepo(url) {
-    const score = await license(url);
-    console.log(`License score for ${url}: ${score}`);
-}
-printLicenseRepo("https://github.com/Rohit-kamath/ECE-461-Group-12-FA2023-project-part1");
+exports.license = license;

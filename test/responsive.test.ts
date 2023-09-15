@@ -13,5 +13,5 @@ test("responsive.ts returns 0 for githubURLFail", async () => {
 //test to see if license.ts returns 1 for githubURLSucceed
 test("responsive.ts returns 1 for githubURLSucceed", async () => {
     const score = await responsive(githubURLSucceed);
-    expect(score).toBeLessThan(1);
+    expect(score).toBe(1);
 }, 20000);
