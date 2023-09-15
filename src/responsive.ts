@@ -87,7 +87,7 @@ async function fetchIssues(owner: string, repo: string): Promise<any[]> {
           return 1 - (median - 1) / 6;
         }
       }
-       catch (error) {
+        catch (error) {
         console.error('Error:', error);
         throw error; // Re-throw the error to be caught by the caller
     }

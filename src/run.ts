@@ -3,7 +3,6 @@
 import fetch from "node-fetch";
 import { Command } from "commander";
 import { readFileSync } from "fs";
-import { join } from "path";
 import { getBusFactor } from "./busFactor";
 import { license } from "./license";
 import { responsive } from "./responsive";
@@ -35,7 +34,7 @@ program
             const fileContents = readFileSync(file, "utf-8");
             const urls = fileContents.split("\n");
             for (let url of urls) {
-                let newUrl = url;
+                const newUrl = url;
                 if (url.includes("npmjs.com")) {
                     url = await getGithubUrl(url);
                 }
