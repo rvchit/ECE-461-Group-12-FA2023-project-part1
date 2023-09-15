@@ -4,11 +4,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-interface CorrectnessResult {
-    correctnessScore: number;
-}
-
-
 async function fetchGitHubData(fullRepoUrl: string, endpoint: string): Promise<any> {
     const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
     if (!repoUrlMatch) {
@@ -34,7 +29,7 @@ async function fetchGitHubData(fullRepoUrl: string, endpoint: string): Promise<a
     return await response.json();
 }
 
-export async function fetchCorrectnessData(repoUrl: string): Promise<CorrectnessResult> {
+export async function fetchCorrectnessData(repoUrl: string): Promise<number> {
     try {
         const repoUrlMatch = repoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
         if (!repoUrlMatch) {
@@ -54,9 +49,7 @@ export async function fetchCorrectnessData(repoUrl: string): Promise<Correctness
 
         const starsScore = Math.min(repoDetails.stargazers_count / 1000, 1);
         
-        return {
-            correctnessScore: (starsScore + prScore) / 2
-        };
+        return (starsScore + prScore) / 2;
 
     } catch (error: unknown) {
         if (error instanceof Error) {

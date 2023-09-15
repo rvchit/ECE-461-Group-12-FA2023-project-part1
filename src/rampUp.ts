@@ -50,7 +50,10 @@ export async function rampUp(url: string): Promise<number> {
         const uniqueMatches = new Set(matches.map(match => match.toLowerCase()));
         score += 0.16 * uniqueMatches.size;
     }
-
+    //if score is greater than 1, return 1
+    if (score > 1) {
+        return 1;
+    }
     return score;
 }
 
