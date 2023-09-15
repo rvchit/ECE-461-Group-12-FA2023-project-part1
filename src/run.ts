@@ -21,6 +21,12 @@ async function getGithubUrl(npmUrl: string): Promise<string> {
     return `https://github.com${githubUrlWithPackageName}`
 }
 
+function formatter(metric: number): string{
+    const truncated = metric.toFixed(5);
+    const trimmed = truncated.replace(/\.?0*$/, '');
+    return trimmed;
+}
+
 program
     .version("0.0.1")
     .argument("<file>", "file with npm urls")
@@ -39,7 +45,7 @@ program
                 const rampUpScore = await rampUp(url);
                 const correctnessScore = await fetchCorrectnessData(url);
                 const netScore = licenseScore * ((responsiveScore * 0.3) + (busFactor * 0.4) + (correctnessScore * 0.15) + (rampUpScore * 0.15));
-                console.log(`{"URL":"${newUrl}", "NET_SCORE":${netScore.toFixed(1)}, "RAMP_UP_SCORE":${rampUpScore.toFixed(1)}, "CORRECTNESS_SCORE":${correctnessScore.toFixed(1)}, "BUS_FACTOR_SCORE":${busFactor.toFixed(1)}, "RESPONSIVE_MAINTAINER_SCORE":${responsiveScore.toFixed(1)}, "LICENSE_SCORE":${licenseScore.toFixed(1)}}`);
+                console.log(`{"URL":"${newUrl}", "NET_SCORE":${formatter(netScore)}, "RAMP_UP_SCORE":${formatter(rampUpScore)}, "CORRECTNESS_SCORE":${formatter(correctnessScore)}, "BUS_FACTOR_SCORE":${formatter(busFactor)}, "RESPONSIVE_MAINTAINER_SCORE":${formatter(responsiveScore)}, "LICENSE_SCORE":${formatter(licenseScore)}}`);
             }
         } catch (error) {
             console.error(error);
