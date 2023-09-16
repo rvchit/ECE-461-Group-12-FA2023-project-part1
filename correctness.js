@@ -14,12 +14,12 @@ async function fetchGitHubData(fullRepoUrl, endpoint) {
     }
     const repoUrl = repoUrlMatch[1];
     const apiUrl = `https://api.github.com/${endpoint.replace('OWNER/REPO', repoUrl)}`;
-    //console.log('Constructed API URL:', apiUrl); 
+    //console.log('Constructed API URL:', apiUrl);
     const response = await (0, node_fetch_1.default)(apiUrl, {
         headers: {
-            'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json'
-        }
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            Accept: 'application/vnd.github.v3+json',
+        },
     });
     if (!response.ok) {
         throw new Error(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
@@ -64,4 +64,4 @@ exports.fetchCorrectnessData = fetchCorrectnessData;
 }
 
 printCorrectnessForRepo();
-*/ 
+*/

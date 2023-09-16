@@ -16,7 +16,7 @@ function parseDate(dateString) {
 }
 //Grabs the 50 most recent closed issues from GitHub API
 async function fetchIssues(owner, repo) {
-    const perPage = 50; // Number of pull requests per page (maximum allowed by GitHub)
+    const perPage = 100; // Number of pull requests per page (maximum allowed by GitHub)
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed&page=1&per_page=${perPage}`;
     const response = await (0, node_fetch_1.default)(apiUrl, {
         headers: {
@@ -28,20 +28,6 @@ async function fetchIssues(owner, repo) {
     }
     const closedIssues = await response.json();
     return closedIssues;
-}
-//Fetches issue data of a specified issue number
-async function fetchIssueData(owner, repo, issueNumber) {
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`;
-    const response = await (0, node_fetch_1.default)(apiUrl, {
-        headers: {
-            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        },
-    });
-    if (!response.ok) {
-        throw new Error(`GitHub API request failed: ${response.statusText}`);
-    }
-    const issueData = await response.json();
-    return issueData;
 }
 //Finds the median of the time taken to close an issue, over 50 samples
 function findMedian(numbers) {
@@ -61,16 +47,15 @@ function findMedian(numbers) {
 }
 //
 async function responsive(url) {
-    const urlParts = url.split("/");
+    const urlParts = url.split('/');
     const repo = urlParts.pop();
     const owner = urlParts.pop();
     const score_list = [];
     try {
         const issues = await fetchIssues(owner, repo);
         for (const issue of issues) {
-            const issueData = await fetchIssueData(owner, repo, issue.number);
             const created = parseDate(issue.created_at);
-            const closed = parseDate(issueData.closed_at);
+            const closed = parseDate(issue.closed_at);
             const diff = (closed.valueOf() - created.valueOf()) / (ms_to_sec * sec_to_hour * hours_to_days); // diff measured in days
             score_list.push(diff);
         }

@@ -14,21 +14,24 @@ async function fetchContributors(fullRepoUrl) {
     }
     const repoUrl = repoUrlMatch[1];
     const apiUrl = `https://api.github.com/repos/${repoUrl}/contributors`;
-    //console.log('Constructed API URL:', apiUrl); 
+    //console.log('Constructed API URL:', apiUrl);
     const response = await (0, node_fetch_1.default)(apiUrl, {
         headers: {
-            'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json'
-        }
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            Accept: 'application/vnd.github.v3+json',
+        },
     });
     if (!response.ok) {
         throw new Error(`Failed to fetch contributors from ${repoUrl}. Status: ${response.statusText}`);
     }
     const data = await response.json();
-    if (!Array.isArray(data) || !data.every(d => 'login' in d && 'contributions' in d)) {
+    if (!Array.isArray(data) || !data.every((d) => 'login' in d && 'contributions' in d)) {
         throw new Error('Expected an array of contributors but received a different type.');
     }
-    return data.map(item => ({ login: item.login, contributions: item.contributions }));
+    return data.map((item) => ({
+        login: item.login,
+        contributions: item.contributions,
+    }));
 }
 function calculateBusFactor(contributors) {
     const sortedContributors = [...contributors].sort((a, b) => b.contributions - a.contributions);
@@ -61,4 +64,4 @@ exports.getBusFactor = getBusFactor;
 }
 
 printBusFactorForRepo();
-*/ 
+*/
