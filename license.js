@@ -1,7 +1,7 @@
 "use strict";
 //function uses github token in .env file to use githubAPI and uses a regEx to find the license in the readme file in typescript
 //input = github url, output = score. Score = 0 if no license, Score = 1 if license is found
-//uses fetch 
+//uses fetch
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -11,7 +11,7 @@ const node_fetch_1 = __importDefault(require("node-fetch"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 async function license(url) {
-    const urlParts = url.split("/");
+    const urlParts = url.split('/');
     const repo = urlParts.pop();
     const owner = urlParts.pop();
     const apiURL = `https://api.github.com/repos/${owner}/${repo}/readme`;
@@ -24,7 +24,7 @@ async function license(url) {
         throw new Error(`Failed to fetch readme from ${apiURL}`);
     }
     const { content } = await response.json();
-    const readme = Buffer.from(content, "base64").toString("utf-8");
+    const readme = Buffer.from(content, 'base64').toString('utf-8');
     const licenseRegex = /licen[sc]e/gi;
     const hasLicense = licenseRegex.test(readme);
     return hasLicense ? 1 : 0;
