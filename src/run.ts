@@ -24,7 +24,7 @@ if (process.argv[2] === 'install') {
 
     installProcess?.on('close', (code) => {
       if (code === 0) {
-        console.log('Dependencies installed successfully.');
+        console.log('Dependency installed successfully.');
       } else {
         console.error(`Dependency installation failed with code ${code}.`);
       }
