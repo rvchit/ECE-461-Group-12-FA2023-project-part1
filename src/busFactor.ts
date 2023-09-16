@@ -1,68 +1,71 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 
-
 dotenv.config();
 
 interface Contributor {
-    login: string;
-    contributions: number;
+	login: string;
+	contributions: number;
 }
 
 async function fetchContributors(fullRepoUrl: string): Promise<Contributor[]> {
-    const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
-    if (!repoUrlMatch) {
-        throw new Error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
-    }
+	const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
+	if (!repoUrlMatch) {
+		throw new Error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
+	}
 
-    const repoUrl = repoUrlMatch[1];
-    const apiUrl = `https://api.github.com/repos/${repoUrl}/contributors`;
-    //console.log('Constructed API URL:', apiUrl); 
-    
-    const response = await fetch(apiUrl, {
-        headers: {
-            'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json'
-        }
-    });
+	const repoUrl = repoUrlMatch[1];
+	const apiUrl = `https://api.github.com/repos/${repoUrl}/contributors`;
+	//console.log('Constructed API URL:', apiUrl);
 
-    if (!response.ok) {
-        throw new Error(`Failed to fetch contributors from ${repoUrl}. Status: ${response.statusText}`);
-    }
+	const response = await fetch(apiUrl, {
+		headers: {
+			Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+			Accept: 'application/vnd.github.v3+json',
+		},
+	});
 
-    const data = await response.json();
-    
-    if (!Array.isArray(data) || !data.every(d => 'login' in d && 'contributions' in d)) {
-        throw new Error('Expected an array of contributors but received a different type.');
-    }
+	if (!response.ok) {
+		throw new Error(`Failed to fetch contributors from ${repoUrl}. Status: ${response.statusText}`);
+	}
 
-    return data.map(item => ({ login: item.login, contributions: item.contributions }));
+	const data = await response.json();
+
+	if (!Array.isArray(data) || !data.every((d) => 'login' in d && 'contributions' in d)) {
+		throw new Error('Expected an array of contributors but received a different type.');
+	}
+
+	return data.map((item) => ({
+		login: item.login,
+		contributions: item.contributions,
+	}));
 }
 
 function calculateBusFactor(contributors: Contributor[]): number {
-    const sortedContributors = [...contributors].sort((a, b) => b.contributions - a.contributions);
+	const sortedContributors = [...contributors].sort((a, b) => b.contributions - a.contributions);
 
-    let majorContributorsCount = 0;
-    let contributionsCounted = 0;
-    const halfOfTotalContributions = sortedContributors.reduce((acc, contributor) => acc + contributor.contributions, 0) / 2;
+	let majorContributorsCount = 0;
+	let contributionsCounted = 0;
+	const halfOfTotalContributions =
+		sortedContributors.reduce((acc, contributor) => acc + contributor.contributions, 0) / 2;
 
-    for (const contributor of sortedContributors) {
-        contributionsCounted += contributor.contributions;
-        majorContributorsCount++;
+	for (const contributor of sortedContributors) {
+		contributionsCounted += contributor.contributions;
+		majorContributorsCount++;
 
-        if (contributionsCounted >= halfOfTotalContributions) {
-            break;
-        }
-    }
+		if (contributionsCounted >= halfOfTotalContributions) {
+			break;
+		}
+	}
 
-    const busFactor = Math.min(majorContributorsCount / 10, 1);
+	const busFactor = Math.min(majorContributorsCount / 10, 1);
 
-    return busFactor;
+	return busFactor;
 }
 
 export async function getBusFactor(repoUrl: string): Promise<number> {
-    const contributors = await fetchContributors(repoUrl);
-    return calculateBusFactor(contributors);
+	const contributors = await fetchContributors(repoUrl);
+	return calculateBusFactor(contributors);
 }
 
 /*async function printBusFactorForRepo() {

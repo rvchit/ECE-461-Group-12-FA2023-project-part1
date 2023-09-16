@@ -1,63 +1,60 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 
-
 dotenv.config();
 
 async function fetchGitHubData(fullRepoUrl: string, endpoint: string): Promise<any> {
-    const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
-    if (!repoUrlMatch) {
-        throw new Error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
-    }
+	const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
+	if (!repoUrlMatch) {
+		throw new Error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
+	}
 
-    const repoUrl = repoUrlMatch[1];
-    const apiUrl = `https://api.github.com/${endpoint.replace('OWNER/REPO', repoUrl)}`;
+	const repoUrl = repoUrlMatch[1];
+	const apiUrl = `https://api.github.com/${endpoint.replace('OWNER/REPO', repoUrl)}`;
 
-    //console.log('Constructed API URL:', apiUrl); 
+	//console.log('Constructed API URL:', apiUrl);
 
-    const response = await fetch(apiUrl, {
-        headers: {
-            'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json'
-        }
-    });
+	const response = await fetch(apiUrl, {
+		headers: {
+			Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+			Accept: 'application/vnd.github.v3+json',
+		},
+	});
 
-    if (!response.ok) {
-        throw new Error(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
-    }
+	if (!response.ok) {
+		throw new Error(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
+	}
 
-    return await response.json();
+	return await response.json();
 }
 
 export async function fetchCorrectnessData(repoUrl: string): Promise<number> {
-    try {
-        const repoUrlMatch = repoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
-        if (!repoUrlMatch) {
-            throw new Error(`Invalid GitHub repository URL: ${repoUrl}`);
-        }
-        const repoPath = repoUrlMatch[1];
-        
-        const repoDetails = await fetchGitHubData(repoUrl, `repos/${repoPath}`);
-        const openPRData = await fetchGitHubData(repoUrl, `search/issues?q=repo:${repoPath}+type:pr+state:open`);
-        const closedPRData = await fetchGitHubData(repoUrl, `search/issues?q=repo:${repoPath}+type:pr+state:closed`);
-        
-        
-        let prScore = 0;
-        if (closedPRData.total_count + openPRData.total_count > 0) {
-            prScore = closedPRData.total_count / (closedPRData.total_count + openPRData.total_count);
-        }
+	try {
+		const repoUrlMatch = repoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
+		if (!repoUrlMatch) {
+			throw new Error(`Invalid GitHub repository URL: ${repoUrl}`);
+		}
+		const repoPath = repoUrlMatch[1];
 
-        const starsScore = Math.min(repoDetails.stargazers_count / 1000, 1);
-        
-        return (starsScore + prScore) / 2;
+		const repoDetails = await fetchGitHubData(repoUrl, `repos/${repoPath}`);
+		const openPRData = await fetchGitHubData(repoUrl, `search/issues?q=repo:${repoPath}+type:pr+state:open`);
+		const closedPRData = await fetchGitHubData(repoUrl, `search/issues?q=repo:${repoPath}+type:pr+state:closed`);
 
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            throw new Error(`Failed to fetch correctness data: ${error.message}`);
-        } else {
-            throw new Error('An unknown error occurred while fetching correctness data');
-        }
-    }
+		let prScore = 0;
+		if (closedPRData.total_count + openPRData.total_count > 0) {
+			prScore = closedPRData.total_count / (closedPRData.total_count + openPRData.total_count);
+		}
+
+		const starsScore = Math.min(repoDetails.stargazers_count / 1000, 1);
+
+		return (starsScore + prScore) / 2;
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			throw new Error(`Failed to fetch correctness data: ${error.message}`);
+		} else {
+			throw new Error('An unknown error occurred while fetching correctness data');
+		}
+	}
 }
 
 /*async function  printCorrectnessForRepo() {
