@@ -12,6 +12,8 @@ const license_1 = require("./license");
 const responsive_1 = require("./responsive");
 const rampUp_1 = require("./rampUp");
 const correctness_1 = require("./correctness");
+const logger_1 = __importDefault(require("./logger"));
+const logger = (0, logger_1.default)('Correctness');
 const program = new commander_1.Command();
 async function getGithubUrl(npmUrl) {
     const packageName = npmUrl.split('package/')[1];
@@ -33,6 +35,7 @@ program
     try {
         const fileContents = (0, fs_1.readFileSync)(file, 'utf-8');
         const urls = fileContents.split('\n');
+        logger.info(`grabbing net score for ${urls}`);
         for (let url of urls) {
             const newUrl = url;
             if (url.includes('npmjs.com')) {
@@ -49,7 +52,8 @@ program
         }
     }
     catch (error) {
-        console.error(error);
+        logger.error(`Failed to get net score metrics. Error: ${error}`);
+        console.error(`Failed to get net score metrics. Error: ${error}`);
     }
 });
 program.parse(process.argv);

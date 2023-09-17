@@ -1,18 +1,13 @@
 "use strict";
-// A score of 0 means you don’t have a readMe.
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.rampUp = void 0;
-// readMe length score has a weight of 0.2. The readMe length score has a score of 0
-// if the readMe is 0 lines long (empty), and 200 lines means a score of 1. And then
-// we scale the length of a readMe to be between those 2 sizes.
-// Key words have a certain weight based on a regEx parse.
-// “Installation”, “Features”, “Quick Start”, “Wiki” or “Guide”, “Examples” would each
-// have a weight of 0.16 totaling to a combined weight of 0.8
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const logger_1 = __importDefault(require("./logger"));
+const logger = (0, logger_1.default)('Correctness');
 dotenv_1.default.config();
 async function rampUp(url) {
     const urlParts = url.split('/');
@@ -25,7 +20,7 @@ async function rampUp(url) {
         },
     });
     if (!response.ok) {
-        // A score of 0 means don’t have a readMe.
+        logger.info("Couldn't get readme for rampuUp. Score of 0");
         return 0;
     }
     const { content } = await response.json();

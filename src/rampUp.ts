@@ -1,17 +1,8 @@
-// A score of 0 means you don’t have a readMe.
-
-// readMe length score has a weight of 0.2. The readMe length score has a score of 0
-// if the readMe is 0 lines long (empty), and 200 lines means a score of 1. And then
-// we scale the length of a readMe to be between those 2 sizes.
-
-// Key words have a certain weight based on a regEx parse.
-
-// “Installation”, “Features”, “Quick Start”, “Wiki” or “Guide”, “Examples” would each
-// have a weight of 0.16 totaling to a combined weight of 0.8
-
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import createModuleLogger from './logger';
 
+const logger = createModuleLogger('Correctness');
 dotenv.config();
 
 export async function rampUp(url: string): Promise<number> {
@@ -27,7 +18,7 @@ export async function rampUp(url: string): Promise<number> {
 	});
 
 	if (!response.ok) {
-		// A score of 0 means don’t have a readMe.
+		logger.info("Couldn't get readme for rampuUp. Score of 0");
 		return 0;
 	}
 

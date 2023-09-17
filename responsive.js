@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.responsive = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const logger_1 = __importDefault(require("./logger"));
+const logger = (0, logger_1.default)('Correctness');
 dotenv_1.default.config();
 const ms_to_sec = 1000;
 const sec_to_hour = 3600;
@@ -14,9 +16,8 @@ const hours_to_days = 24;
 function parseDate(dateString) {
     return new Date(dateString);
 }
-//Grabs the 50 most recent closed issues from GitHub API
 async function fetchIssues(owner, repo) {
-    const perPage = 100; // Number of pull requests per page (maximum allowed by GitHub)
+    const perPage = 100;
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed&page=1&per_page=${perPage}`;
     const response = await (0, node_fetch_1.default)(apiUrl, {
         headers: {
@@ -24,12 +25,13 @@ async function fetchIssues(owner, repo) {
         },
     });
     if (!response.ok) {
-        throw new Error(`GitHub API request failed: ${response.statusText}`);
+        logger.error(`Failed to fetch data from ${repo}. Status: ${response.statusText}`);
+        throw new Error(`Failed to fetch data from ${repo}. Status: ${response.statusText}`);
     }
     const closedIssues = await response.json();
     return closedIssues;
 }
-//Finds the median of the time taken to close an issue, over 50 samples
+//Finds the median of the time taken to close an issue
 function findMedian(numbers) {
     // Step 1: Sort the list
     const sortedNumbers = numbers.slice().sort((a, b) => a - b);
@@ -72,8 +74,9 @@ async function responsive(url) {
         }
     }
     catch (error) {
-        console.error('Error:', error);
-        throw error; // Re-throw the error to be caught by the caller
+        logger.error(`Failed to calculate score of ${repo}. Error: ${error}`);
+        console.error(`Failed to calculate score of ${repo}. Error: ${error}`);
+        throw error;
     }
 }
 exports.responsive = responsive;
