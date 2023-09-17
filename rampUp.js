@@ -7,7 +7,7 @@ exports.rampUp = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const logger_1 = __importDefault(require("./logger"));
-const logger = (0, logger_1.default)('Correctness');
+const logger = (0, logger_1.default)('Ramp Up');
 dotenv_1.default.config();
 async function rampUp(url) {
     const urlParts = url.split('/');

@@ -10,7 +10,7 @@ import { rampUp } from './rampUp';
 import { fetchCorrectnessData } from './correctness';
 import createModuleLogger from './logger';
 
-const logger = createModuleLogger('Correctness');
+const logger = createModuleLogger('run cli');
 const program = new Command();
 
 async function getGithubUrl(npmUrl: string): Promise<string> {

@@ -13,7 +13,7 @@ const responsive_1 = require("./responsive");
 const rampUp_1 = require("./rampUp");
 const correctness_1 = require("./correctness");
 const logger_1 = __importDefault(require("./logger"));
-const logger = (0, logger_1.default)('Correctness');
+const logger = (0, logger_1.default)('run cli');
 const program = new commander_1.Command();
 async function getGithubUrl(npmUrl) {
     const packageName = npmUrl.split('package/')[1];

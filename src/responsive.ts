@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import createModuleLogger from './logger';
 
-const logger = createModuleLogger('Correctness');
+const logger = createModuleLogger('responsive');
 dotenv.config();
 const ms_to_sec: number = 1000;
 const sec_to_hour: number = 3600;

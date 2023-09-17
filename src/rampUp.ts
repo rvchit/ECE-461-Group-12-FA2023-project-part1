@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import createModuleLogger from './logger';
 
-const logger = createModuleLogger('Correctness');
+const logger = createModuleLogger('Ramp Up');
 dotenv.config();
 
 export async function rampUp(url: string): Promise<number> {

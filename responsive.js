@@ -7,7 +7,7 @@ exports.responsive = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const logger_1 = __importDefault(require("./logger"));
-const logger = (0, logger_1.default)('Correctness');
+const logger = (0, logger_1.default)('responsive');
 dotenv_1.default.config();
 const ms_to_sec = 1000;
 const sec_to_hour = 3600;

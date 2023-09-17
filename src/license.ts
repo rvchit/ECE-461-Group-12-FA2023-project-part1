@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import createModuleLogger from './logger';
 
-const logger = createModuleLogger('Correctness');
+const logger = createModuleLogger('License');
 dotenv.config();
 async function license(url: string): Promise<number> {
 	const urlParts = url.split('/');
