@@ -6,15 +6,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.fetchCorrectnessData = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const logger_1 = __importDefault(require("./logger"));
+const logger = (0, logger_1.default)('Correctness');
 dotenv_1.default.config();
 async function fetchGitHubData(fullRepoUrl, endpoint) {
+    logger.info(`Fetching contributors for repo: ${fullRepoUrl}`);
     const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
     if (!repoUrlMatch) {
+        logger.error(`Invalid GitHub repository URL:', ${fullRepoUrl}`);
         throw new Error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
     }
     const repoUrl = repoUrlMatch[1];
     const apiUrl = `https://api.github.com/${endpoint.replace('OWNER/REPO', repoUrl)}`;
-    //console.log('Constructed API URL:', apiUrl);
+    logger.info(`Constructed API URL: ${apiUrl}`);
     const response = await (0, node_fetch_1.default)(apiUrl, {
         headers: {
             Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
@@ -22,6 +26,7 @@ async function fetchGitHubData(fullRepoUrl, endpoint) {
         },
     });
     if (!response.ok) {
+        logger.error(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
         throw new Error(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
     }
     return await response.json();
@@ -30,6 +35,7 @@ async function fetchCorrectnessData(repoUrl) {
     try {
         const repoUrlMatch = repoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
         if (!repoUrlMatch) {
+            logger.error(`Invalid GitHub repository URL: ${repoUrl}`);
             throw new Error(`Invalid GitHub repository URL: ${repoUrl}`);
         }
         const repoPath = repoUrlMatch[1];
@@ -40,28 +46,22 @@ async function fetchCorrectnessData(repoUrl) {
         if (closedPRData.total_count + openPRData.total_count > 0) {
             prScore = closedPRData.total_count / (closedPRData.total_count + openPRData.total_count);
         }
+        logger.info(`Calculated PR score: ${prScore}`);
         const starsScore = Math.min(repoDetails.stargazers_count / 1000, 1);
-        return (starsScore + prScore) / 2;
+        logger.info(`Calculated stars score: ${starsScore}`);
+        const finalScore = (starsScore + prScore) / 2;
+        logger.info(`Calculated final score: ${finalScore}`);
+        return finalScore;
     }
     catch (error) {
         if (error instanceof Error) {
+            logger.error(`Failed to fetch correctness data: ${error.message}`);
             throw new Error(`Failed to fetch correctness data: ${error.message}`);
         }
         else {
+            logger.error('An unknown error occurred while fetching correctness data');
             throw new Error('An unknown error occurred while fetching correctness data');
         }
     }
 }
 exports.fetchCorrectnessData = fetchCorrectnessData;
-/*async function  printCorrectnessForRepo() {
-    const repoUrl = 'https://github.com/netdata/netdata';
-    try {
-        const result = await fetchCorrectnessData(repoUrl);
-        console.log('Correctness score:', result.correctnessScore);
-    } catch (error) {
-        console.error('An error occurred:', error);
-    }
-}
-
-printCorrectnessForRepo();
-*/

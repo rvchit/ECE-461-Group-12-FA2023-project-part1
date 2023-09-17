@@ -1,5 +1,8 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import createModuleLogger from './logger';
+
+const logger = createModuleLogger('responsive');
 dotenv.config();
 const ms_to_sec: number = 1000;
 const sec_to_hour: number = 3600;
@@ -9,9 +12,9 @@ const hours_to_days: number = 24;
 function parseDate(dateString: any) {
 	return new Date(dateString);
 }
-//Grabs the 50 most recent closed issues from GitHub API
+
 async function fetchIssues(owner: string, repo: string): Promise<any[]> {
-	const perPage = 100; // Number of pull requests per page (maximum allowed by GitHub)
+	const perPage = 100;
 	const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed&page=1&per_page=${perPage}`;
 	const response = await fetch(apiUrl, {
 		headers: {
@@ -20,13 +23,14 @@ async function fetchIssues(owner: string, repo: string): Promise<any[]> {
 	});
 
 	if (!response.ok) {
-		throw new Error(`GitHub API request failed: ${response.statusText}`);
+		logger.error(`Failed to fetch data from ${repo}. Status: ${response.statusText}`)
+		throw new Error(`Failed to fetch data from ${repo}. Status: ${response.statusText}`);
 	}
 
 	const closedIssues = await response.json();
 	return closedIssues;
 }
-//Finds the median of the time taken to close an issue, over 50 samples
+//Finds the median of the time taken to close an issue
 function findMedian(numbers: any) {
 	// Step 1: Sort the list
 	const sortedNumbers = numbers.slice().sort((a: any, b: any) => a - b);
@@ -69,8 +73,9 @@ async function responsive(url: string): Promise<number> {
 			return 1 - (median - 1) / 6;
 		}
 	} catch (error) {
-		console.error('Error:', error);
-		throw error; // Re-throw the error to be caught by the caller
+		logger.error(`Failed to calculate score of ${repo}. Error: ${error}`)
+		console.error(`Failed to calculate score of ${repo}. Error: ${error}`);
+		throw error;
 	}
 }
 export { responsive };

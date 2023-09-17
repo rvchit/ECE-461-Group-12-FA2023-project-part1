@@ -8,7 +8,9 @@ import { license } from './license';
 import { responsive } from './responsive';
 import { rampUp } from './rampUp';
 import { fetchCorrectnessData } from './correctness';
+import createModuleLogger from './logger';
 
+const logger = createModuleLogger('run cli');
 const program = new Command();
 
 async function getGithubUrl(npmUrl: string): Promise<string> {
@@ -33,6 +35,7 @@ program
 		try {
 			const fileContents = readFileSync(file, 'utf-8');
 			const urls = fileContents.split('\n');
+			logger.info(`grabbing net score for ${urls}`);
 			for (let url of urls) {
 				const newUrl = url;
 				if (url.includes('npmjs.com')) {
@@ -57,7 +60,8 @@ program
 				);
 			}
 		} catch (error) {
-			console.error(error);
+			logger.error(`Failed to get net score metrics. Error: ${error}`)
+			console.error(`Failed to get net score metrics. Error: ${error}`);
 		}
 	});
 
