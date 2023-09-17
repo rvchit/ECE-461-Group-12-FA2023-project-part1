@@ -1,5 +1,8 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
+import createModuleLogger from '../logger';
+
+const logger = createModuleLogger('Bus Factor');
 
 dotenv.config();
 
@@ -9,14 +12,18 @@ interface Contributor {
 }
 
 async function fetchContributors(fullRepoUrl: string): Promise<Contributor[]> {
+    logger.info(`Fetching contributors for repo: ${fullRepoUrl}`);
+
 	const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
 	if (!repoUrlMatch) {
+        logger.error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
 		throw new Error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
 	}
 
 	const repoUrl = repoUrlMatch[1];
 	const apiUrl = `https://api.github.com/repos/${repoUrl}/contributors`;
-	//console.log('Constructed API URL:', apiUrl);
+	
+    logger.info(`Constructed API URL: ${apiUrl}`);
 
 	const response = await fetch(apiUrl, {
 		headers: {
@@ -26,13 +33,15 @@ async function fetchContributors(fullRepoUrl: string): Promise<Contributor[]> {
 	});
 
 	if (!response.ok) {
+        logger.error(`Failed to fetch contributors from ${repoUrl}. Status: ${response.statusText}`);
 		throw new Error(`Failed to fetch contributors from ${repoUrl}. Status: ${response.statusText}`);
 	}
 
 	const data = await response.json();
 
 	if (!Array.isArray(data) || !data.every((d) => 'login' in d && 'contributions' in d)) {
-		throw new Error('Expected an array of contributors but received a different type.');
+        logger.error(`Expected an array of contributors but received a different type.`);
+		throw new Error(`Expected an array of contributors but received a different type.`);
 	}
 
 	return data.map((item) => ({
@@ -54,11 +63,13 @@ function calculateBusFactor(contributors: Contributor[]): number {
 		majorContributorsCount++;
 
 		if (contributionsCounted >= halfOfTotalContributions) {
+            logger.info(`Bus factor calculated with ${majorContributorsCount} major contributors.`);
 			break;
 		}
 	}
 
 	const busFactor = Math.min(majorContributorsCount / 10, 1);
+    logger.info(`Calculated bus factor: ${busFactor}`);
 
 	return busFactor;
 }
