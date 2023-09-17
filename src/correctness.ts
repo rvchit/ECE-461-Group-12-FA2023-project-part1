@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
-import createModuleLogger from '../logger';
+import createModuleLogger from './logger';
 
 const logger = createModuleLogger('Correctness');
 
@@ -71,16 +71,3 @@ export async function fetchCorrectnessData(repoUrl: string): Promise<number> {
 		}
 	}
 }
-
-/*async function  printCorrectnessForRepo() {
-    const repoUrl = 'https://github.com/netdata/netdata';
-    try {
-        const result = await fetchCorrectnessData(repoUrl);
-        console.log('Correctness score:', result.correctnessScore);
-    } catch (error) {
-        console.error('An error occurred:', error);
-    }
-}
-
-printCorrectnessForRepo();
-*/

@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
-import createModuleLogger from '../logger';
+import createModuleLogger from './logger';
 
 const logger = createModuleLogger('Bus Factor');
 

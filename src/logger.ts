@@ -31,7 +31,6 @@ const createModuleLogger = (moduleName: string) => {
             format.printf(({ timestamp, level, message }) => `${timestamp} ${level} [${moduleName}]: ${message}`),
         ),
         transports: [
-            new transports.Console(),
             new transports.File({ filename: LOG_FILE }),
         ],
     });
