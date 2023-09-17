@@ -24,7 +24,7 @@ jobs:
 
       - name: Test
         run: npm run test
-
-      - name: Use GitHub Token
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Use GitHub Token
