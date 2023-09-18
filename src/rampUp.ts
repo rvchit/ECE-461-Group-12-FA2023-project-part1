@@ -1,49 +1,82 @@
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
+import fs from 'fs';
+import { GitConfig, init, fetch, readObject } from 'isomorphic-git';
+import http from 'isomorphic-git/http/node';
 import createModuleLogger from './logger';
 
 const logger = createModuleLogger('Ramp Up');
-dotenv.config();
+
+// Initialize the git repository (only once in your application)
+async function initializeGitRepository() {
+  const config: GitConfig = {
+    fs,
+    http,
+  };
+  await init(config);
+}
+
+// Function to download the README content
+async function downloadReadme(owner: string, repo: string): Promise<string | null> {
+  const config: GitConfig = {
+    fs,
+    http,
+    onAuth: () => ({
+      // Use OAuth token for authentication (recommended)
+      token: process.env.GITHUB_TOKEN,
+    }),
+  };
+
+  try {
+    await fetch({
+      ...config,
+      url: `https://github.com/${owner}/${repo}.git`,
+    });
+
+    const { object: { blob: content } } = await readObject(config, {
+      dir: `./${repo}`, // Change to the appropriate directory
+      oid: 'HEAD:README.md', // Use the correct path to the README file
+    });
+
+    return Buffer.from(content).toString('utf-8');
+  } catch (error) {
+    logger.error(`Failed to download README for ${repo}. Error: ${error.message}`);
+    return null;
+  }
+}
 
 export async function rampUp(url: string): Promise<number> {
-	const urlParts = url.split('/');
-	const repo = urlParts.pop();
-	const owner = urlParts.pop();
-	const apiURL = `https://api.github.com/repos/${owner}/${repo}/readme`;
+  const urlParts = url.split('/');
+  const repo = urlParts.pop();
+  const owner = urlParts.pop();
 
-	const response = await fetch(apiURL, {
-		headers: {
-			Authorization: `token ${process.env.GITHUB_TOKEN}`,
-		},
-	});
+  await initializeGitRepository();
+  const readme = await downloadReadme(owner, repo);
 
-	if (!response.ok) {
-		logger.info("Couldn't get readme for rampuUp. Score of 0");
-		return 0;
-	}
+  if (!readme) {
+    logger.info(`Couldn't get readme for rampUp. Score of 0`);
+    return 0;
+  }
 
-	const { content } = await response.json();
-	const readme = Buffer.from(content, 'base64').toString('utf-8');
-	const readmeLines = readme.split('\n').length;
+  const readmeLines = readme.split('\n').length;
 
-	// Readme length score calculation
-	let score = 0;
-	if (readmeLines > 0) {
-		score += 0.2 * Math.min(readmeLines / 200, 1);
-	}
+  // Readme length score calculation
+  let score = 0;
+  if (readmeLines > 0) {
+    score += 0.2 * Math.min(readmeLines / 200, 1);
+  }
 
-	// Keywords score calculation using cregex pattern
-	const keywordPattern = /Installation|Features|Quick Start|Wiki|Guide|Examples/gi;
-	const matches = readme.match(keywordPattern);
+  // Keywords score calculation using cregex pattern
+  const keywordPattern = /Installation|Features|Quick Start|Wiki|Guide|Examples/gi;
+  const matches = readme.match(keywordPattern);
 
-	if (matches) {
-		// use a Set to eliminate duplicate matches, then get the unique count
-		const uniqueMatches = new Set(matches.map((match) => match.toLowerCase()));
-		score += 0.16 * uniqueMatches.size;
-	}
-	//if score is greater than 1, return 1
-	if (score > 1) {
-		return 1;
-	}
-	return score;
+  if (matches) {
+    // Use a Set to eliminate duplicate matches, then get the unique count
+    const uniqueMatches = new Set(matches.map((match) => match.toLowerCase()));
+    score += 0.16 * uniqueMatches.size;
+  }
+
+  // If score is greater than 1, return 1
+  if (score > 1) {
+    return 1;
+  }
+  return score;
 }
