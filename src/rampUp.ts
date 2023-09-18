@@ -5,7 +5,7 @@ import createModuleLogger from './logger';
 
 const logger = createModuleLogger('Ramp Up');
 
-// Initialize the git repository (only once in your application)
+// Initialize the git repository
 async function initializeGitRepository() {
   const config: GitConfig = {
     fs,
@@ -14,7 +14,7 @@ async function initializeGitRepository() {
   await init(config);
 }
 
-// Function to download the README content
+// download the README content
 async function downloadReadme(owner: string, repo: string): Promise<string | null> {
   const config: GitConfig = {
     fs,
@@ -32,8 +32,8 @@ async function downloadReadme(owner: string, repo: string): Promise<string | nul
     });
 
     const { object: { blob: content } } = await readObject(config, {
-      dir: `./${repo}`, // Change to the appropriate directory
-      oid: 'HEAD:README.md', // Use the correct path to the README file
+      dir: `./${repo}`, // needs to be changed to the appropriate directory
+      oid: 'HEAD:README.md', // have to use the correct path to the README file, I can change this
     });
 
     return Buffer.from(content).toString('utf-8');
@@ -64,7 +64,7 @@ export async function rampUp(url: string): Promise<number> {
     score += 0.2 * Math.min(readmeLines / 200, 1);
   }
 
-  // Keywords score calculation using cregex pattern
+  // Keywords score calculation using regex pattern
   const keywordPattern = /Installation|Features|Quick Start|Wiki|Guide|Examples/gi;
   const matches = readme.match(keywordPattern);
 
@@ -74,7 +74,6 @@ export async function rampUp(url: string): Promise<number> {
     score += 0.16 * uniqueMatches.size;
   }
 
-  // If score is greater than 1, return 1
   if (score > 1) {
     return 1;
   }
