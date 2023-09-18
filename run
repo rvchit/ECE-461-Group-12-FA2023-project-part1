@@ -1,26 +1,4 @@
 #!/bin/bash
 
 filename="$1"
-
 ./run.js "$filename"
-
-# Check if the user wants to install dependencies
-if [ "$1" == "install" ]; then
-  # Check if npm is installed
-  if command -v npm &>/dev/null; then
-    echo "Installing project dependencies using npm..."
-    npm install node-fetch
-    npm install dotenv
-    npm install winston
-    npm install commander
-    npm install fs
-    echo "Project dependencies installed successfully."
-  else
-    echo "npm is not installed. Please install npm before running this script."
-    exit 1
-  fi
-else
-  echo "Usage: ./run install"
-  exit 1
-fi
-
