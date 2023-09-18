@@ -65,4 +65,42 @@ program
 		}
 	});
 
+program
+	.command('test')
+	.description('Run tests and calculate code coverage')
+	.action(async () => {
+	  try {
+		const { spawn } = require('child_process');
+  
+		// Run Jest tests
+		const jestProcess = spawn('npx', ['jest']);
+  
+		jestProcess.stdout.on('data', (data: Buffer) => {
+		  console.log(`Test Output: ${data}`);
+		});
+  
+		jestProcess.stderr.on('data', (data: Buffer) => {
+		  console.error(`Test Error: ${data}`);
+		});
+  
+		jestProcess.on('close', async (code: number) => {
+		  if (code === 0) {
+			// Tests passed, now calculate code coverage
+			const coverage = spawn('npx', ['jest-cov-cli']);
+			coverage.on('close', (code: number) => {
+			  if (code === 0) {
+				console.log('Code coverage calculation completed successfully.');
+			  } else {
+				console.error('Code coverage calculation failed.');
+			  }
+			});
+		  } else {
+			console.error('Tests failed. Code coverage calculation skipped.');
+		  }
+		});
+	  } catch (error) {
+		logger.error(`Failed to run tests. Error: ${error}`);
+		console.error(`Failed to run tests. Error: ${error}`);
+	  }
+	});
 program.parse(process.argv);
