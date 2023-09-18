@@ -9,9 +9,34 @@ import { responsive } from './responsive';
 import { rampUp } from './rampUp';
 import { fetchCorrectnessData } from './correctness';
 import createModuleLogger from './logger';
+import { exec } from 'child_process';
 
-const logger = createModuleLogger('run cli');
 const program = new Command();
+program
+  .command('install')
+  .description('Install dependencies')
+  .action(() => {
+    console.log('Installing dependencies...');
+    const child = exec('npm install');
+
+    child.stdout?.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+    });
+
+    child.stderr?.on('data', (data) => {
+      console.error(`stderr: ${data}`);
+    });
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        console.log('npm install completed successfully.');
+      } else {
+        console.error(`npm install failed with code ${code}.`);
+      }
+    });
+  });
+const logger = createModuleLogger('run cli');
+
 
 async function getGithubUrl(npmUrl: string): Promise<string> {
 	const packageName = npmUrl.split('package/')[1];
