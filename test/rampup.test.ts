@@ -14,7 +14,7 @@ test('it should return a score of 0.744 for a repository with a README and some 
 	expect(score).toBe(0.744);
 });
 
-test('it should return a score of 1 for a repository with no README', async () => {
+test('it should return a score of 1 for a repository with perfect README', async () => {
 	const score = await rampUp(gitURL1);
 	expect(score).toBe(1);
 });
