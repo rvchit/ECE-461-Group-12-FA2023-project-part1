@@ -1,42 +1,38 @@
-import git from 'isomorphic-git';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
 import dotenv from 'dotenv';
 import createModuleLogger from './logger';
-import nodeFetch from 'node-fetch';
+import git from 'isomorphic-git';
+import http from 'isomorphic-git/http/node';
+import fs from 'fs';
+import path from 'path';
+import { dir } from 'tmp-promise';
 
 dotenv.config();
+
 const logger = createModuleLogger('Ramp Up');
 
 export async function rampUp(url: string): Promise<number> {
-  const urlParts = url.split('/');
-  const repo = urlParts.pop();
-  const owner = urlParts.pop();
-  const tempDir = path.join(os.tmpdir(), `repo-${Date.now()}`);
-  
+  let score = 0;
+
   try {
-    await fs.promises.mkdir(tempDir);
-    await git.clone({
-      fs,
-      http: nodeFetch,
-      dir: tempDir,
-      url: `https://github.com/${owner}/${repo}.git`,
-      singleBranch: true,
-      depth: 1,
-    });
-    
-    const readmePath = path.join(tempDir, 'README.md');
-    if (!fs.existsSync(readmePath)) {
-      logger.info("Couldn't get readme for rampUp. Score of 0");
+    // Create a temporary directory to clone the repository
+    const { path: localPath, cleanup } = await dir();
+
+    // Clone the repository using isomorphic-git
+    await git.clone({ fs, http, dir: localPath, url });
+
+    // Try reading the README.md file from the local clone
+    let readme;
+    try {
+      readme = fs.readFileSync(path.join(localPath, 'README.md'), 'utf-8');
+    } catch {
+      logger.info("Couldn't find README.md locally; Score of 0");
+      await cleanup();
       return 0;
     }
-    
-    const readme = await fs.promises.readFile(readmePath, 'utf-8');
+
+    // Calculate ramp up score based on the README content
     const readmeLines = readme.split('\n').length;
-    
-    // Readme length score calculation
-    let score = 0;
+
     if (readmeLines > 0) {
       score += 0.2 * Math.min(readmeLines / 200, 1);
     }
@@ -46,17 +42,21 @@ export async function rampUp(url: string): Promise<number> {
     const matches = readme.match(keywordPattern);
 
     if (matches) {
-      // use a Set to eliminate duplicate matches, then get the unique count
       const uniqueMatches = new Set(matches.map((match) => match.toLowerCase()));
       score += 0.16 * uniqueMatches.size;
     }
 
-    // if score is greater than 1, return 1
-    return Math.min(score, 1);
+    // Cleanup the cloned repository
+    await cleanup();
+    
+    // If score is greater than 1, return 1
+    if (score > 1) {
+      return 1;
+    }
+
+    return score;
   } catch (error) {
-    logger.error('Error during rampUp', error);
-    throw error;
-  } finally {
-    await fs.promises.rm(tempDir, { recursive: true, force: true });
+    logger.error('Error in rampUp function', error);
+    return score;
   }
 }
