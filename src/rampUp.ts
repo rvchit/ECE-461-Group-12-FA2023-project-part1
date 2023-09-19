@@ -22,10 +22,19 @@ async function rampUp(url: string): Promise<number> {
 
 		// Try reading the README.md file from the local clone
 		let readme;
-		try {
-			readme = fs.readFileSync(path.join(localPath, 'README.md'), 'utf-8');
-		} catch {
-			logger.info("Couldn't find README.md locally; Score of 0");
+		const readmeVariations = ['README.md', 'readme.md', 'Readme.md'];
+
+		for (const readmeFile of readmeVariations) {
+			try {
+				readme = fs.readFileSync(path.join(localPath, readmeFile), 'utf-8');
+				break;
+			} catch {
+				// If reading fails, continue to the next iteration
+			}
+		}
+
+		if (!readme) {
+			logger.info("Couldn't find a readable README file locally; Score of 0");
 			await cleanup();
 			return 0;
 		}
@@ -43,16 +52,11 @@ async function rampUp(url: string): Promise<number> {
 
 		if (matches) {
 			const uniqueMatches = new Set(matches.map((match) => match.toLowerCase()));
-			score += 0.16 * uniqueMatches.size;
+			score += Math.min(0.16 * uniqueMatches.size, 0.8);
 		}
 
 		// Cleanup the cloned repository
 		await cleanup();
-
-		// If score is greater than 1, return 1
-		if (score > 1) {
-			return 1;
-		}
 
 		return score;
 	} catch (error) {
