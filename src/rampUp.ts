@@ -10,7 +10,7 @@ dotenv.config();
 
 const logger = createModuleLogger('Ramp Up');
 
-export async function rampUp(url: string): Promise<number> {
+async function rampUp(url: string): Promise<number> {
 	let score = 0;
 
 	try {
@@ -60,3 +60,5 @@ export async function rampUp(url: string): Promise<number> {
 		return score;
 	}
 }
+
+export { rampUp };
