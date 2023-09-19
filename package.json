@@ -33,6 +33,7 @@
     "node-fetch": "^2.7.0",
     "winston": "^3.10.0",
     "isomorphic-git": "^1.24.5"
+    "tmp-promise":"^3.0.3"
   },
   "jest": {
     "preset": "ts-jest",
