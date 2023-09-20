@@ -11,6 +11,7 @@ import { fetchCorrectnessData } from './correctness';
 import createModuleLogger from './logger';
 import { exec } from 'child_process';
 
+const logger = createModuleLogger('run cli');
 const program = new Command();
 program
   .command('install')
@@ -29,14 +30,14 @@ program
 
     child.on('close', (code) => {
       if (code === 0) {
+		logger.info("npm install completed successfully.")
         console.log('npm install completed successfully.');
       } else {
+		logger.error(`npm install failed with code ${code}.`)
         console.error(`npm install failed with code ${code}.`);
       }
     });
   });
-const logger = createModuleLogger('run cli');
-
 
 async function getGithubUrl(npmUrl: string): Promise<string> {
 	const packageName = npmUrl.split('package/')[1];

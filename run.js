@@ -14,6 +14,7 @@ const rampUp_1 = require("./rampUp");
 const correctness_1 = require("./correctness");
 const logger_1 = __importDefault(require("./logger"));
 const child_process_1 = require("child_process");
+const logger = (0, logger_1.default)('run cli');
 const program = new commander_1.Command();
 program
     .command('install')
@@ -29,14 +30,15 @@ program
     });
     child.on('close', (code) => {
         if (code === 0) {
+            logger.info("npm install completed successfully.");
             console.log('npm install completed successfully.');
         }
         else {
+            logger.error(`npm install failed with code ${code}.`);
             console.error(`npm install failed with code ${code}.`);
         }
     });
 });
-const logger = (0, logger_1.default)('run cli');
 async function getGithubUrl(npmUrl) {
     const packageName = npmUrl.split('package/')[1];
     const response = await (0, node_fetch_1.default)(npmUrl);
