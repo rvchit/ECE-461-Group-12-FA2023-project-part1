@@ -17,6 +17,7 @@
     "@types/node-fetch": "^2.6.4",
     "@types/strip-bom": "^4.0.1",
     "@types/strip-json-comments": "^3.0.0",
+    "@types/tmp": "^0.2.4",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
     "eslint": "^8.49.0",
@@ -31,11 +32,11 @@
     "commander": "^11.0.0",
     "dotenv": "^16.3.1",
     "fs": "^0.0.1-security",
-    "lint": "^0.8.19",
-    "node-fetch": "^2.7.0",
-    "winston": "^3.10.0",
     "isomorphic-git": "^1.10.0",
-    "tmp-promise":"^3.0.3"
+    "lint": "^1.1.2",
+    "node-fetch": "^2.7.0",
+    "tmp-promise": "^3.0.3",
+    "winston": "^3.10.0"
   },
   "jest": {
     "preset": "ts-jest",

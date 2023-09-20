@@ -18,7 +18,7 @@ async function rampUp(url: string): Promise<number> {
 		const { path: localPath, cleanup } = await dir();
 
 		// Clone the repository using isomorphic-git
-		await git.clone({ fs, http, dir: localPath, url });
+		await git.clone({ fs, http, dir: localPath, url, singleBranch: true, depth: 1});
 
 		// Try reading the README.md file from the local clone
 		let readme;
@@ -41,19 +41,14 @@ async function rampUp(url: string): Promise<number> {
 
 		// Calculate ramp up score based on the README content
 		const readmeLines = readme.split('\n').length;
-
-		if (readmeLines > 0) {
-			score += 0.2 * Math.min(readmeLines / 200, 1);
-		}
+		score += 0.2 * Math.min(readmeLines / 200, 1);
 
 		// Keywords score calculation using regex pattern
 		const keywordPattern = /Installation|Features|Quick Start|Wiki|Guide|Examples/gi;
 		const matches = readme.match(keywordPattern);
 
-		if (matches) {
-			const uniqueMatches = new Set(matches.map((match) => match.toLowerCase()));
-			score += Math.min(0.16 * uniqueMatches.size, 0.8);
-		}
+		const uniqueMatches = matches ? new Set(matches.map((match) => match.toLowerCase())) : new Set();
+		score += Math.min(0.16 * uniqueMatches.size, 0.8);
 
 		// Cleanup the cloned repository
 		await cleanup();
