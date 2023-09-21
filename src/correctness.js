@@ -38,10 +38,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fetchCorrectnessData = void 0;
 var node_fetch_1 = require("node-fetch");
-var dotenv = require("dotenv");
+var dotenv_1 = require("dotenv");
 var logger_1 = require("./logger");
 var logger = (0, logger_1.default)('Correctness');
-dotenv.config();
+dotenv_1.default.config();
 function fetchGitHubData(fullRepoUrl, endpoint) {
     return __awaiter(this, void 0, void 0, function () {
         var repoUrlMatch, repoUrl, apiUrl, response;

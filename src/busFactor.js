@@ -47,10 +47,10 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getBusFactor = void 0;
 var node_fetch_1 = require("node-fetch");
-var dotenv = require("dotenv");
+var dotenv_1 = require("dotenv");
 var logger_1 = require("./logger");
 var logger = (0, logger_1.default)('Bus Factor');
-dotenv.config();
+dotenv_1.default.config();
 function fetchContributors(fullRepoUrl) {
     return __awaiter(this, void 0, void 0, function () {
         var repoUrlMatch, repoUrl, apiUrl, response, data;

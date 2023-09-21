@@ -38,10 +38,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.responsive = void 0;
 var node_fetch_1 = require("node-fetch");
-var dotenv = require("dotenv");
+var dotenv_1 = require("dotenv");
 var logger_1 = require("./logger");
 var logger = (0, logger_1.default)('responsive');
-dotenv.config();
+dotenv_1.default.config();
 var ms_to_sec = 1000;
 var sec_to_hour = 3600;
 var hours_to_days = 24;

@@ -38,10 +38,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.license = void 0;
 var node_fetch_1 = require("node-fetch");
-var dotenv = require("dotenv");
+var dotenv_1 = require("dotenv");
 var logger_1 = require("./logger");
 var logger = (0, logger_1.default)('License');
-dotenv.config();
+dotenv_1.default.config();
 function license(url) {
     return __awaiter(this, void 0, void 0, function () {
         var urlParts, repo, owner, apiURL, response, content, readme, licenseRegex, hasLicense;

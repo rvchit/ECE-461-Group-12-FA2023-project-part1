@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var winston_1 = require("winston");
-var dotenv = require("dotenv");
-dotenv.config();
+var dotenv_1 = require("dotenv");
+dotenv_1.default.config();
 var LOG_LEVEL = process.env.LOG_LEVEL || '0';
 var LOG_FILE = process.env.LOG_FILE || './combined.log';
 var winstonLogLevel;
