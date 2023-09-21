@@ -91,4 +91,39 @@ program
 		}
 	});
 
+program
+	.command('test')
+	.description('Run the test suite')
+	.action(() => {
+		console.log('Running tests...');
+		exec('npm test', (error, stdout, stderr) => {
+			if (error) {
+				console.error(`Test suite encountered an error: ${error.message}`);
+				process.exit(1);
+			}
+
+			// regex from stdout
+			const totalTestsMatch = stdout.match(/Tests:\s+(\d+)\s+total/);
+			const passedTestsMatch = stdout.match(/Tests:\s+(\d+)\s+passed/);
+			const coverageMatch = stdout.match(/All files\s+\|[^|]+|[^|]+|[^|]+|[^|]+|([^|]+)|/);
+
+			if (totalTestsMatch && passedTestsMatch && coverageMatch) {
+				const total = totalTestsMatch[1];
+				const passed = passedTestsMatch[1];
+				const coverage = coverageMatch[1].trim();
+
+				console.log(`Total: ${total}`);
+				console.log(`Passed: ${passed}`);
+				console.log(`Coverage: ${coverage}`);
+				console.log(`${passed}/${total} test cases passed. ${coverage} line coverage achieved.`);
+			} else {
+				console.log('Failed to extract test report data.');
+			}
+
+			if (stderr) {
+				console.error(`stderr: ${stderr}`);
+			}
+		});
+	});
+
 program.parse(process.argv);
