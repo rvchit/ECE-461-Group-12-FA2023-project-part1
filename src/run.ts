@@ -102,8 +102,7 @@ program
 				process.exit(1);
 			}
 
-			// Here, extract the information from stdout and format it as desired
-			// Note: This regex is just a basic example and might need adjustment
+			// regex from stdout
 			const totalTestsMatch = stdout.match(/Tests:\s+(\d+)\s+total/);
 			const passedTestsMatch = stdout.match(/Tests:\s+(\d+)\s+passed/);
 			const coverageMatch = stdout.match(/All files\s+\|[^|]+|[^|]+|[^|]+|[^|]+|([^|]+)|/);
