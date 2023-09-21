@@ -16,12 +16,7 @@ program
   .command('install')
   .description('Install dependencies')
   .action(() => {
-    console.log('Installing dependencies...');
     const child = exec('npm install');
-
-    child.stdout?.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-    });
 
     child.stderr?.on('data', (data) => {
       console.error(`stderr: ${data}`);
@@ -29,7 +24,13 @@ program
 
     child.on('close', (code) => {
       if (code === 0) {
-        console.log('npm install completed successfully.');
+		try {
+			const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
+			const dependencyCount = Object.keys(packageJson.dependencies || {}).length;
+			console.log(`${dependencyCount} dependencies installed...`);
+		} catch (err) {
+			console.error('Error reading package.json:', err);
+		  }
       } else {
         console.error(`npm install failed with code ${code}.`);
       }
