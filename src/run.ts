@@ -11,6 +11,7 @@ import { fetchCorrectnessData } from './correctness';
 import createModuleLogger from './logger';
 import { exec } from 'child_process';
 
+const logger = createModuleLogger('run cli');
 const program = new Command();
 program
   .command('install')
@@ -32,12 +33,11 @@ program
 			console.error('Error reading package.json:', err);
 		  }
       } else {
+		logger.error(`npm install failed with code ${code}.`)
         console.error(`npm install failed with code ${code}.`);
       }
     });
   });
-const logger = createModuleLogger('run cli');
-
 
 async function getGithubUrl(npmUrl: string): Promise<string> {
 	const packageName = npmUrl.split('package/')[1];
@@ -89,6 +89,41 @@ program
 			logger.error(`Failed to get net score metrics. Error: ${error}`)
 			console.error(`Failed to get net score metrics. Error: ${error}`);
 		}
+	});
+
+program
+	.command('test')
+	.description('Run the test suite')
+	.action(() => {
+		console.log('Running tests...');
+		exec('npm test', (error, stdout, stderr) => {
+			if (error) {
+				console.error(`Test suite encountered an error: ${error.message}`);
+				process.exit(1);
+			}
+
+			// regex from stdout
+			const totalTestsMatch = stdout.match(/Tests:\s+(\d+)\s+total/);
+			const passedTestsMatch = stdout.match(/Tests:\s+(\d+)\s+passed/);
+			const coverageMatch = stdout.match(/All files\s+\|[^|]+|[^|]+|[^|]+|[^|]+|([^|]+)|/);
+
+			if (totalTestsMatch && passedTestsMatch && coverageMatch) {
+				const total = totalTestsMatch[1];
+				const passed = passedTestsMatch[1];
+				const coverage = coverageMatch[1].trim();
+
+				console.log(`Total: ${total}`);
+				console.log(`Passed: ${passed}`);
+				console.log(`Coverage: ${coverage}`);
+				console.log(`${passed}/${total} test cases passed. ${coverage} line coverage achieved.`);
+			} else {
+				console.log('Failed to extract test report data.');
+			}
+
+			if (stderr) {
+				console.error(`stderr: ${stderr}`);
+			}
+		});
 	});
 
 program.parse(process.argv);
