@@ -31,7 +31,7 @@ program
 			console.log(`${dependencyCount} dependencies installed...`);
 		} catch (err) {
 			console.error('Error reading package.json:', err);
-		  }
+		}
       } else {
 		logger.error(`npm install failed with code ${code}.`)
         console.error(`npm install failed with code ${code}.`);
