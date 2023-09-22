@@ -40,37 +40,41 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var node_fetch_1 = require("node-fetch");
 var commander_1 = require("commander");
 var fs_1 = require("fs");
-var busFactor_1 = require("./src/busFactor");
-var license_1 = require("./src/license");
-var responsive_1 = require("./src/responsive");
-var rampUp_1 = require("./src/rampUp");
-var correctness_1 = require("./src/correctness");
-var logger_1 = require("./src/logger");
+var busFactor_1 = require("./busFactor");
+var license_1 = require("./license");
+var responsive_1 = require("./responsive");
+var rampUp_1 = require("./rampUp");
+var correctness_1 = require("./correctness");
+var logger_1 = require("./logger");
 var child_process_1 = require("child_process");
+var logger = (0, logger_1.default)('run cli');
 var program = new commander_1.Command();
 program
     .command('install')
     .description('Install dependencies')
     .action(function () {
-    var _a, _b;
-    console.log('Installing dependencies...');
+    var _a;
     var child = (0, child_process_1.exec)('npm install');
-    (_a = child.stdout) === null || _a === void 0 ? void 0 : _a.on('data', function (data) {
-        console.log("stdout: ".concat(data));
-    });
-    (_b = child.stderr) === null || _b === void 0 ? void 0 : _b.on('data', function (data) {
+    (_a = child.stderr) === null || _a === void 0 ? void 0 : _a.on('data', function (data) {
         console.error("stderr: ".concat(data));
     });
     child.on('close', function (code) {
         if (code === 0) {
-            console.log('npm install completed successfully.');
+            try {
+                var packageJson = JSON.parse((0, fs_1.readFileSync)('package.json', 'utf8'));
+                var dependencyCount = Object.keys(packageJson.dependencies || {}).length;
+                console.log("".concat(dependencyCount, " dependencies installed..."));
+            }
+            catch (err) {
+                console.error('Error reading package.json:', err);
+            }
         }
         else {
+            logger.error("npm install failed with code ".concat(code, "."));
             console.error("npm install failed with code ".concat(code, "."));
         }
     });
 });
-var logger = (0, logger_1.default)('run cli');
 function getGithubUrl(npmUrl) {
     return __awaiter(this, void 0, void 0, function () {
         var packageName, response, text, githubUrl, githubUrlWithPackageName;
@@ -151,4 +155,35 @@ program
         }
     });
 }); });
+program
+    .command('test')
+    .description('Run the test suite')
+    .action(function () {
+    console.log('Running tests...');
+    (0, child_process_1.exec)('npm test', function (error, stdout, stderr) {
+        if (error) {
+            console.error("Test suite encountered an error: ".concat(error.message));
+            process.exit(1);
+        }
+        // regex from stdout
+        var totalTestsMatch = stdout.match(/Tests:\s+(\d+)\s+total/);
+        var passedTestsMatch = stdout.match(/Tests:\s+(\d+)\s+passed/);
+        var coverageMatch = stdout.match(/All files\s+\|[^|]+|[^|]+|[^|]+|[^|]+|([^|]+)|/);
+        if (totalTestsMatch && passedTestsMatch && coverageMatch) {
+            var total = totalTestsMatch[1];
+            var passed = passedTestsMatch[1];
+            var coverage = coverageMatch[1].trim();
+            console.log("Total: ".concat(total));
+            console.log("Passed: ".concat(passed));
+            console.log("Coverage: ".concat(coverage));
+            console.log("".concat(passed, "/").concat(total, " test cases passed. ").concat(coverage, " line coverage achieved."));
+        }
+        else {
+            console.log('Failed to extract test report data.');
+        }
+        if (stderr) {
+            console.error("stderr: ".concat(stderr));
+        }
+    });
+});
 program.parse(process.argv);
