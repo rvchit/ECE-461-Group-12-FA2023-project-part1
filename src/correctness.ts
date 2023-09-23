@@ -6,7 +6,7 @@ const logger = createModuleLogger('Correctness');
 
 dotenv.config();
 
-async function fetchGitHubData(fullRepoUrl: string, endpoint: string): Promise<any> {
+export async function fetchGitHubData(fullRepoUrl: string, endpoint: string): Promise<any> {
 	logger.info(`Fetching contributors for repo: ${fullRepoUrl}`);
 	const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
 	if (!repoUrlMatch) {

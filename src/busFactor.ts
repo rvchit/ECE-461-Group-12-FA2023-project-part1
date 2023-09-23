@@ -11,7 +11,7 @@ interface Contributor {
 	contributions: number;
 }
 
-async function fetchContributors(fullRepoUrl: string): Promise<Contributor[]> {
+export async function fetchContributors(fullRepoUrl: string): Promise<Contributor[]> {
     logger.info(`Fetching contributors for repo: ${fullRepoUrl}`);
 
 	const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
@@ -51,18 +51,23 @@ async function fetchContributors(fullRepoUrl: string): Promise<Contributor[]> {
 }
 
 function calculateBusFactor(contributors: Contributor[]): number {
-	const sortedContributors = [...contributors].sort((a, b) => b.contributions - a.contributions);
+    if (contributors.length === 1 && contributors[0].contributions > 0) {
+        logger.info(`Only one contributor with all contributions. Bus factor: 0`);
+        return 0;
+    }
 
+	const sortedContributors = [...contributors].sort((a, b) => b.contributions - a.contributions);
+	
 	let majorContributorsCount = 0;
 	let contributionsCounted = 0;
-	const halfOfTotalContributions =
-		sortedContributors.reduce((acc, contributor) => acc + contributor.contributions, 0) / 2;
+	const percentOfTotalContributions =
+		sortedContributors.reduce((acc, contributor) => acc + contributor.contributions, 0) * 0.6;
 
 	for (const contributor of sortedContributors) {
 		contributionsCounted += contributor.contributions;
 		majorContributorsCount++;
 
-		if (contributionsCounted >= halfOfTotalContributions) {
+		if (contributionsCounted >= percentOfTotalContributions) {
             logger.info(`Bus factor calculated with ${majorContributorsCount} major contributors.`);
 			break;
 		}
@@ -78,16 +83,3 @@ export async function getBusFactor(repoUrl: string): Promise<number> {
 	const contributors = await fetchContributors(repoUrl);
 	return calculateBusFactor(contributors);
 }
-
-/*async function printBusFactorForRepo() {
-    const repoUrl = 'https://github.com/netdata/netdata';
-    try {
-        const result = await getBusFactor(repoUrl);
-        console.log('Bus factor:', result.busFactor);
-    } catch (error) {
-        console.error('Error fetching bus factor:', error);
-    }
-}
-
-printBusFactorForRepo(); 
-*/
