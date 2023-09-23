@@ -14,30 +14,53 @@ import { exec } from 'child_process';
 const logger = createModuleLogger('run cli');
 const program = new Command();
 program
-  .command('install')
-  .description('Install dependencies')
-  .action(() => {
-    const child = exec('npm install');
+	.command('install')
+	.description('Install dependencies')
+	.action(() => {
+		console.log('Installing dependencies...');
+		const child = exec('npm install');
 
-    child.stderr?.on('data', (data) => {
-      console.error(`stderr: ${data}`);
-    });
+		child.stdout?.on('data', (data) => {
+			console.log(`stdout: ${data}`);
+		});
 
-    child.on('close', (code) => {
-      if (code === 0) {
-		try {
-			const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
-			const dependencyCount = Object.keys(packageJson.dependencies || {}).length;
-			console.log(`${dependencyCount} dependencies installed...`);
-		} catch (err) {
-			console.error('Error reading package.json:', err);
-		}
-      } else {
-		logger.error(`npm install failed with code ${code}.`)
-        console.error(`npm install failed with code ${code}.`);
-      }
-    });
-  });
+		child.stderr?.on('data', (data) => {
+			console.error(`stderr: ${data}`);
+		});
+
+		child.on('close', (code) => {
+			if (code === 0) {
+				logger.info('npm install completed successfully.');
+				console.log('npm install completed successfully.');
+			} else {
+				logger.error(`npm install failed with code ${code}.`);
+				console.error(`npm install failed with code ${code}.`);
+			}
+		});
+	});
+
+program
+	.command('test')
+	.description('Run the test suite')
+	.action(() => {
+		exec('npm test', (error, stdout, stderr) => {
+			if (error) {
+				throw new Error(`Failed to run tests. Error: ${error}`);
+			}
+			const testMatch = stderr.match(/Tests:\s+(\d+)\s+passed,\s+(\d+)\s+total/);
+			const coverageMatch = stdout.match(/All files\s+\|[^|]+\|[^|]+\|[^|]+\|([^|]+)\|/);
+
+			if (coverageMatch && testMatch) {
+				const passed = testMatch[1];
+				const total = testMatch[2];
+				const coverage = coverageMatch[1].trim();
+
+				console.log(`${passed}/${total} test cases passed. ${coverage}% line coverage achieved.`); 
+			} else {
+				throw new Error('Failed to extract test report data.');
+			}
+		});
+	});
 
 async function getGithubUrl(npmUrl: string): Promise<string> {
 	const packageName = npmUrl.split('package/')[1];
@@ -60,7 +83,8 @@ program
 	.action(async (file) => {
 		try {
 			const fileContents = readFileSync(file, 'utf-8');
-			const urls = fileContents.split('\n');
+			//grab urls from file and remove empty lines
+			const urls = fileContents.split('\n').filter((url) => url !== '');
 			logger.info(`grabbing net score for ${urls}`);
 			for (let url of urls) {
 				const newUrl = url;
@@ -86,44 +110,10 @@ program
 				);
 			}
 		} catch (error) {
-			logger.error(`Failed to get net score metrics. Error: ${error}`)
+			logger.error(`Failed to get net score metrics. Error: ${error}`);
+			console.error(`File argument provided:, ${file}`);
 			console.error(`Failed to get net score metrics. Error: ${error}`);
 		}
-	});
-
-program
-	.command('test')
-	.description('Run the test suite')
-	.action(() => {
-		console.log('Running tests...');
-		exec('npm test', (error, stdout, stderr) => {
-			if (error) {
-				console.error(`Test suite encountered an error: ${error.message}`);
-				process.exit(1);
-			}
-
-			// regex from stdout
-			const totalTestsMatch = stdout.match(/Tests:\s+(\d+)\s+total/);
-			const passedTestsMatch = stdout.match(/Tests:\s+(\d+)\s+passed/);
-			const coverageMatch = stdout.match(/All files\s+\|[^|]+|[^|]+|[^|]+|[^|]+|([^|]+)|/);
-
-			if (totalTestsMatch && passedTestsMatch && coverageMatch) {
-				const total = totalTestsMatch[1];
-				const passed = passedTestsMatch[1];
-				const coverage = coverageMatch[1].trim();
-
-				console.log(`Total: ${total}`);
-				console.log(`Passed: ${passed}`);
-				console.log(`Coverage: ${coverage}`);
-				console.log(`${passed}/${total} test cases passed. ${coverage} line coverage achieved.`);
-			} else {
-				console.log('Failed to extract test report data.');
-			}
-
-			if (stderr) {
-				console.error(`stderr: ${stderr}`);
-			}
-		});
 	});
 
 program.parse(process.argv);
