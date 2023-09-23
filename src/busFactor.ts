@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import createModuleLogger from './logger';
 
+//Initialize logger
 const logger = createModuleLogger('Bus Factor');
 
 dotenv.config();
@@ -57,7 +58,7 @@ function calculateBusFactor(contributors: Contributor[]): number {
     }
 
 	const sortedContributors = [...contributors].sort((a, b) => b.contributions - a.contributions);
-	
+
 	let majorContributorsCount = 0;
 	let contributionsCounted = 0;
 	const percentOfTotalContributions =
