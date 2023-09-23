@@ -5,6 +5,7 @@ dotenv.config();
 
 const LOG_LEVEL = process.env.LOG_LEVEL || "0";
 const LOG_FILE = process.env.LOG_FILE;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 let winstonLogLevel: "error" | "info" | "debug";
 switch (LOG_LEVEL) {
@@ -22,18 +23,29 @@ switch (LOG_LEVEL) {
 }
 
 const createModuleLogger = (moduleName: string) => {
+  // Determine the appropriate transport based on the environment.
+  const selectedTransports = [];
+  
+  if (NODE_ENV === 'test') {
+      selectedTransports.push(new transports.Console({
+          format: format.combine(
+              format.colorize(),
+              format.printf(({ timestamp, level, message }) => `${timestamp} ${level} [${moduleName}]: ${message}`)
+          )
+      }));
+  } else {
+      selectedTransports.push(new transports.File({ filename: LOG_FILE }));
+  }
+
   return createLogger({
-    level: winstonLogLevel,
-    format: format.combine(
-      format.timestamp({
-        format: "YYYY-MM-DD HH:mm:ss",
-      }),
-      format.printf(
-        ({ timestamp, level, message }) =>
-          `${timestamp} ${level} [${moduleName}]: ${message}`,
+      level: winstonLogLevel,
+      format: format.combine(
+          format.timestamp({
+              format: 'YYYY-MM-DD HH:mm:ss',
+          }),
+          format.printf(({ timestamp, level, message }) => `${timestamp} ${level} [${moduleName}]: ${message}`),
       ),
-    ),
-    transports: [new transports.File({ filename: LOG_FILE })],
+      transports: selectedTransports,
   });
 };
 
