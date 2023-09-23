@@ -83,7 +83,8 @@ program
 	.action(async (file) => {
 		try {
 			const fileContents = readFileSync(file, 'utf-8');
-			const urls = fileContents.split('\n');
+			//grab urls from file and remove empty lines
+			const urls = fileContents.split('\n').filter((url) => url !== '');
 			logger.info(`grabbing net score for ${urls}`);
 			for (let url of urls) {
 				const newUrl = url;
