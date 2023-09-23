@@ -1,4 +1,5 @@
 #!/bin/bash
+DIR="$(dirname "$0")"
 
 filename="$1"
-./run.js "$filename"
+ts-node "$DIR/src/run.ts" "$filename"
