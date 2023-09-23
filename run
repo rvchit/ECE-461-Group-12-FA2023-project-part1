@@ -2,4 +2,4 @@
 DIR="$(dirname "$0")"
 
 filename="$1"
-ts-node "$DIR/src/run.ts" "$filename"
+"$DIR/node_modules/.bin/ts-node" "$DIR/src/run.ts" "$filename"
