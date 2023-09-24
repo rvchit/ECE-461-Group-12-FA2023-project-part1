@@ -20,8 +20,9 @@ async function license(url: string): Promise<number> {
 	});
 
 	if (!response.ok) {
-		logger.error(`Failed to fetch readme from ${apiURL}. Status: ${response.statusText}`);
-		throw new Error(`Failed to fetch readme from ${apiURL}. Status: ${response.statusText}`);
+		logger.info(`Failed to fetch readme from ${apiURL}. Status: ${response.statusText}`);
+		console.log(`Failed to fetch readme from ${apiURL}. Status: ${response.statusText}`);
+		process.exit(1);
 	}
 
 	const { content }: { content: string } = await response.json();

@@ -10,10 +10,10 @@ export async function fetchGitHubData(fullRepoUrl: string, endpoint: string): Pr
 	logger.info(`Fetching contributors for repo: ${fullRepoUrl}`);
 	const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
 	if (!repoUrlMatch) {
-		logger.error(`Invalid GitHub repository URL:', ${fullRepoUrl}`);
-		throw new Error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
+		logger.info(`Invalid GitHub repository URL:', ${fullRepoUrl}`);
+		console.log(`Invalid GitHub repository URL: ${fullRepoUrl}`);
+		process.exit(1);
 	}
-
 	const repoUrl = repoUrlMatch[1];
 	const apiUrl = `https://api.github.com/${endpoint.replace('OWNER/REPO', repoUrl)}`;
 
@@ -27,8 +27,9 @@ export async function fetchGitHubData(fullRepoUrl: string, endpoint: string): Pr
 	});
 
 	if (!response.ok) {
-		logger.error(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
-		throw new Error(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
+		logger.info(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
+		console.log(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
+		process.exit(1);
 	}
 
 	return await response.json();
@@ -38,8 +39,9 @@ export async function fetchCorrectnessData(repoUrl: string): Promise<number> {
 	try {
 		const repoUrlMatch = repoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
 		if (!repoUrlMatch) {
-			logger.error(`Invalid GitHub repository URL: ${repoUrl}`);
-			throw new Error(`Invalid GitHub repository URL: ${repoUrl}`);
+			logger.info(`Invalid GitHub repository URL: ${repoUrl}`);
+			console.log(`Invalid GitHub repository URL: ${repoUrl}`);
+			process.exit(1);
 		}
 		const repoPath = repoUrlMatch[1];
 
@@ -62,11 +64,12 @@ export async function fetchCorrectnessData(repoUrl: string): Promise<number> {
 		return finalScore;
 	} catch (error: unknown) {
 		if (error instanceof Error) {
-			logger.error(`Failed to fetch correctness data: ${error.message}`);
-			throw new Error(`Failed to fetch correctness data: ${error.message}`);
+			logger.info(`Failed to fetch correctness data: ${error.message}`);
+			console.log(`Failed to fetch correctness data: ${error.message}`);
 		} else {
-			logger.error('An unknown error occurred while fetching correctness data');
-			throw new Error('An unknown error occurred while fetching correctness data');
+			logger.info('An unknown error occurred while fetching correctness data');
+			console.log('An unknown error occurred while fetching correctness data');
 		}
+		process.exit(1);	
 	}
 }

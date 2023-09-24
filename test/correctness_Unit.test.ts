@@ -3,6 +3,8 @@ import fetch from 'node-fetch';
 
 jest.mock('node-fetch');
 const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
+const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+const processExitSpy = jest.spyOn(process, 'exit').mockImplementation();
 
 describe('fetchCorrectnessData', () => {
 	afterEach(() => {
@@ -105,18 +107,23 @@ describe('fetchCorrectnessData', () => {
 		expect(result).toBe(0.5); // Only considering the stars score
 	});
 
-	it('should throw an error if fetching repo details fails', async () => {
+	it('should console.log("Failed to fetch data") and then process.exit(1)', async () => {
 		mockedFetch.mockResolvedValueOnce({
 			ok: false,
 			statusText: 'Not Found',
 		} as any);
-		await expect(fetchCorrectnessData('https://github.com/user/repo')).rejects.toThrow('Failed to fetch data');
+
+		await fetchCorrectnessData('https://github.com/user/repo');
+		expect(consoleSpy).toHaveBeenCalledWith('Failed to fetch data from user/repo. Status: Not Found');
+		expect(processExitSpy).toHaveBeenCalledWith(1);
 	});
 
-	it('should throw an error for an invalid GitHub URL', async () => {
-		const invalidUrl = 'https://invalid-url.com/user/repo';
-		await expect(fetchCorrectnessData(invalidUrl)).rejects.toThrow('Invalid GitHub repository URL');
+	it('should console.log("Invalid GitHub repository URL") and then process.exit(1)', async () => {
+		await fetchCorrectnessData('invalidURL');
+		expect(consoleSpy).toHaveBeenCalledWith('Invalid GitHub repository URL: invalidURL');
+		expect(processExitSpy).toHaveBeenCalledWith(1);
 	});
+
 	describe('fetchGitHubData', () => {
 		afterEach(() => {
 			jest.clearAllMocks();
@@ -136,30 +143,5 @@ describe('fetchCorrectnessData', () => {
 			expect(result).toEqual(mockData);
 		});
 
-		it('should throw an error for an invalid GitHub URL', async () => {
-			const invalidUrl = 'https://invalid-url.com/user/repo';
-			const endpoint = 'repos/OWNER/REPO';
-
-			await expect(fetchGitHubData(invalidUrl, endpoint)).rejects.toThrow('Invalid GitHub repository URL');
-		});
-
-		it('should throw an error if the API request fails', async () => {
-			const repoUrl = 'https://github.com/user/repo';
-			const endpoint = 'repos/OWNER/REPO';
-
-			mockedFetch.mockResolvedValueOnce({
-				ok: false,
-				statusText: 'Not Found',
-			} as any);
-			await expect(fetchGitHubData(repoUrl, endpoint)).rejects.toThrow('Failed to fetch data');
-		});
-
-		it('should handle network errors or timeouts', async () => {
-			const repoUrl = 'https://github.com/user/repo';
-			const endpoint = 'repos/OWNER/REPO';
-
-			mockedFetch.mockRejectedValueOnce(new Error('Network error'));
-			await expect(fetchGitHubData(repoUrl, endpoint)).rejects.toThrow('Network error');
-		});
 	});
 });

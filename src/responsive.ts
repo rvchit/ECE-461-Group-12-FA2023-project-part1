@@ -23,8 +23,9 @@ async function fetchIssues(owner: string, repo: string): Promise<any[]> {
 	});
 
 	if (!response.ok) {
-		logger.error(`Failed to fetch data from ${repo}. Status: ${response.statusText}`);
-		throw new Error(`Failed to fetch data from ${repo}. Status: ${response.statusText}`);
+		logger.info(`Failed to fetch data from ${repo}. Status: ${response.statusText}`);
+		console.log(`Failed to fetch data from ${repo}. Status: ${response.statusText}`);
+		process.exit(1);
 	}
 
 	const closedIssues = await response.json();
@@ -73,9 +74,9 @@ async function responsive(url: string): Promise<number> {
 			return 1 - (median - 1) / 6;
 		}
 	} catch (error) {
-		logger.error(`Failed to calculate score of ${repo}. Error: ${error}`);
-		console.error(`Failed to calculate score of ${repo}. Error: ${error}`);
-		throw error;
+		logger.info(`Failed to calculate score of ${repo}. Error: ${error}`);
+		console.log(`Failed to calculate score of ${repo}. Error: ${error}`);
+		process.exit(1);
 	}
 }
 export { responsive };
