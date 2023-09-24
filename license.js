@@ -21,12 +21,13 @@ async function license(url) {
         },
     });
     if (!response.ok) {
-        logger.error(`Failed to fetch readme from ${apiURL}. Status: ${response.statusText}`);
+        logger.info(`Failed to fetch readme from ${apiURL}. Status: ${response.statusText}`);
         console.log(`Failed to fetch readme from ${apiURL}. Status: ${response.statusText}`);
         process.exit(1);
     }
     const { content } = await response.json();
     const readme = Buffer.from(content, 'base64').toString('utf-8');
+    console.log(readme);
     const licenseRegex = /licen[sc]e/gi;
     const hasLicense = licenseRegex.test(readme);
     return hasLicense ? 1 : 0;
