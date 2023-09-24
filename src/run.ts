@@ -1,24 +1,26 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
 import { readFileSync } from 'fs';
 import { exec } from 'child_process';
-import createModuleLogger from './logger';
 
-const logger = createModuleLogger('run cli');
-const program = new Command();
+let fetch: any; // Placeholder for the dynamic import
+let createModuleLogger: any; // Placeholder for the dynamic import
+let logger: any;
 
-let fetch: any;
+async function loadDependencies() {
+    if (!fetch) {
+        const fetchModule = await import('node-fetch');
+        fetch = fetchModule.default || fetchModule;
+    }
 
-async function loadFetch() {
-    const module = await import('node-fetch');
-    fetch = module.default || module;
+    if (!createModuleLogger) {
+        const loggerModule = await import('./logger');
+        createModuleLogger = loggerModule.default || loggerModule;
+        logger = createModuleLogger('run cli');
+    }
 }
 
 async function getGithubUrl(npmUrl: string): Promise<string> {
-    if (!fetch) {
-        await loadFetch();
-    }
     const packageName = npmUrl.split('package/')[1];
     const response = await fetch(npmUrl);
     const text = await response.text();
@@ -27,35 +29,40 @@ async function getGithubUrl(npmUrl: string): Promise<string> {
     return `https://github.com${githubUrlWithPackageName}`;
 }
 
-program
-    .command('install')
-    .description('Install dependencies')
-    .action(() => {
-        const child = exec('npm install');
+function formatter(metric: number): string {
+    const truncated = metric.toFixed(5);
+    const trimmed = truncated.replace(/\.?0*$/, '');
+    return trimmed;
+}
 
-        child.stderr?.on('data', (data) => {
-            console.error(`stderr: ${data}`);
-        });
+const args = process.argv.slice(2);
+const command = args[0];
 
-        child.on('close', (code) => {
-            if (code === 0) {
-                try {
-                    const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
-                    const dependencyCount = Object.keys(packageJson.dependencies || {}).length;
-                    console.log(`${dependencyCount} dependencies installed...`);
-                } catch (err) {
-                    console.error('Error reading package.json:', err);
-                }
-            } else {
-                logger.error(`npm install failed with code ${code}.`);
-                console.error(`npm install failed with code ${code}.`);
+if (command === 'install') {
+    // Logic for install command
+    const child = exec('npm install');
+
+    child.stderr?.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+    });
+
+    child.on('close', (code) => {
+        if (code === 0) {
+            try {
+                const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
+                const dependencyCount = Object.keys(packageJson.dependencies || {}).length;
+                console.log(`${dependencyCount} dependencies installed...`);
+            } catch (err) {
+                console.error('Error reading package.json:', err);
             }
-        });
-    })
+        } else {
+            console.error(`npm install failed with code ${code}.`);
+        }
+    });
 
-    .command('test')
-    .description('Run the test suite')
-    .action(() => {
+} else if (command === 'test') {
+    loadDependencies().then(() => {
+        // Logic for test command
         exec('npm test', (error, stdout, stderr) => {
             if (error) {
                 throw new Error(`Failed to run tests. Error: ${error}`);
@@ -74,16 +81,9 @@ program
         });
     });
 
-function formatter(metric: number): string {
-    const truncated = metric.toFixed(5);
-    const trimmed = truncated.replace(/\.?0*$/, '');
-    return trimmed;
-}
-
-program
-    .version('0.0.1')
-    .argument('<file>', 'file with npm urls')
-    .action(async (file) => {
+} else if (args.length >= 2 && typeof args[1] === 'string') {
+    const file = args[1];
+    loadDependencies().then(async () => {
         const { getBusFactor } = await import('./busFactor');
         const { license } = await import('./license');
         const { responsive } = await import('./responsive');
@@ -107,4 +107,7 @@ program
         }
     });
 
-program.parse(process.argv);
+} else {
+    console.error(`Unknown command or invalid arguments: ${args.join(' ')}`);
+    process.exit(1);
+}
