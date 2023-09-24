@@ -1,7 +1,6 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import createModuleLogger from './logger';
-import { read } from 'fs';
 
 const logger = createModuleLogger('License');
 dotenv.config();
