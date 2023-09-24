@@ -13,7 +13,7 @@ function parseDate(dateString: any) {
 	return new Date(dateString);
 }
 
-async function fetchIssues(owner: string, repo: string): Promise<any[]> {
+export async function fetchIssues(owner: string, repo: string): Promise<any[]> {
 	const perPage = 100;
 	const apiUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=closed&page=1&per_page=${perPage}`;
 	const response = await fetch(apiUrl, {
@@ -29,6 +29,7 @@ async function fetchIssues(owner: string, repo: string): Promise<any[]> {
 	}
 
 	const closedIssues = await response.json();
+	logger.debug(`Fetched ${closedIssues.length} closed issues.`);
 	return closedIssues;
 }
 //Finds the median of the time taken to close an issue
@@ -65,6 +66,8 @@ async function responsive(url: string): Promise<number> {
 			score_list.push(diff);
 		}
 		const median = findMedian(score_list);
+		logger.debug(`Calculated median time to close an issue: ${median} days.`);
+		
 		if (median < 1) {
 			return 1;
 		} else if (median > 7) {

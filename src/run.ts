@@ -21,11 +21,13 @@ async function loadDependencies() {
 }
 
 async function getGithubUrl(npmUrl: string): Promise<string> {
+    logger.debug(`Extracting GitHub URL from npm URL: ${npmUrl}`);
     const packageName = npmUrl.split('package/')[1];
     const response = await fetch(npmUrl);
     const text = await response.text();
     const githubUrl = text.split('github.com')[1].split('"')[0];
     const githubUrlWithPackageName = githubUrl.split('/')[0] + '/' + githubUrl.split('/')[1] + '/' + packageName;
+    logger.debug(`Extracted GitHub URL: ${githubUrlWithPackageName}`);
     return `https://github.com${githubUrlWithPackageName}`;
 }
 
@@ -74,8 +76,10 @@ if (command === 'install') {
                 const total = testMatch[2];
                 const coverage = Math.floor(parseFloat(coverageMatch[1].trim()));
                 console.log(`${passed}/${total} test cases passed. ${coverage}% line coverage achieved.`);
+                logger.debug(`${passed}/${total} test cases passed. ${coverage}% line coverage achieved.`);
             } else {
                 console.log('Failed to extract test report data.');
+                logger.debug('Failed to extract test report data.');
                 process.exit(1);
             }
         });
@@ -104,7 +108,9 @@ if (command === 'install') {
             const rampUpScore = await rampUp(url);
             const correctnessScore = await fetchCorrectnessData(url);
             const netScore = licenseScore * (responsiveScore * 0.3 + busFactor * 0.4 + correctnessScore * 0.15 + rampUpScore * 0.15);
+            logger.debug(`Calculated scores for URL ${newUrl}: NET_SCORE: ${netScore}, RAMP_UP_SCORE: ${rampUpScore}, CORRECTNESS_SCORE: ${correctnessScore}, BUS_FACTOR_SCORE: ${busFactor}, RESPONSIVE_MAINTAINER_SCORE: ${responsiveScore}, LICENSE_SCORE: ${licenseScore}`);
             console.log(`{"URL":"${newUrl}", "NET_SCORE":${formatter(netScore)}, "RAMP_UP_SCORE":${formatter(rampUpScore)}, "CORRECTNESS_SCORE":${formatter(correctnessScore)}, "BUS_FACTOR_SCORE":${formatter(busFactor)}, "RESPONSIVE_MAINTAINER_SCORE":${formatter(responsiveScore)}, "LICENSE_SCORE":${formatter(licenseScore)}}`);
+            
         }
     });
 

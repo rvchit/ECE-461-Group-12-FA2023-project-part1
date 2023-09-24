@@ -3,8 +3,6 @@ import fetch from 'node-fetch';
 
 jest.mock('node-fetch');
 const mockedFetch = fetch as jest.MockedFunction<typeof fetch>;
-const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-const processExitSpy = jest.spyOn(process, 'exit').mockImplementation();
 
 
 describe('Bus Factor functions', () => {
