@@ -4,7 +4,6 @@ import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
 import fs from 'fs';
 import path from 'path';
-import { dir } from 'tmp-promise';
 import { dir as tmpDir } from 'tmp-promise';
 
 
