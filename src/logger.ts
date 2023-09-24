@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const LOG_LEVEL = process.env.LOG_LEVEL || '0';
-const LOG_FILE = process.env.LOG_FILE || './combined.log';
+const LOG_FILE = process.env.LOG_FILE;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 let winstonLogLevel: 'error' | 'info' | 'debug';

@@ -2,11 +2,7 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -55,13 +51,9 @@ function formatter(metric) {
 }
 const args = process.argv.slice(2);
 const command = args[0];
-//console.log("command", command);
 if (command === 'install') {
     // Logic for install command
     const child = (0, child_process_1.exec)('npm install');
-    child.stderr?.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-    });
     child.on('close', (code) => {
         if (code === 0) {
             try {
@@ -70,11 +62,13 @@ if (command === 'install') {
                 console.log(`${dependencyCount} dependencies installed...`);
             }
             catch (err) {
-                console.error('Error reading package.json:', err);
+                console.log('Error reading package.json:', err);
+                process.exit(1);
             }
         }
         else {
-            console.error(`npm install failed with code ${code}.`);
+            console.log(`npm install failed with code ${code}.`);
+            process.exit(1);
         }
     });
 }
@@ -83,7 +77,8 @@ else if (command === 'test') {
         // Logic for test command
         (0, child_process_1.exec)('npm test', (error, stdout, stderr) => {
             if (error) {
-                throw new Error(`Failed to run tests. Error: ${error}`);
+                console.log(`Failed to run tests. Error: ${error}`);
+                process.exit(1);
             }
             const testMatch = stderr.match(/Tests:\s+(\d+)\s+passed,\s+(\d+)\s+total/);
             const coverageMatch = stdout.match(/All files\s+\|[^|]+\|[^|]+\|[^|]+\|([^|]+)\|/);
@@ -94,7 +89,8 @@ else if (command === 'test') {
                 console.log(`${passed}/${total} test cases passed. ${coverage}% line coverage achieved.`);
             }
             else {
-                throw new Error('Failed to extract test report data.');
+                console.log('Failed to extract test report data.');
+                process.exit(1);
             }
         });
     });

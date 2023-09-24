@@ -42,10 +42,6 @@ if (command === 'install') {
     // Logic for install command
     const child = exec('npm install');
 
-    child.stderr?.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-    });
-
     child.on('close', (code) => {
         if (code === 0) {
             try {
@@ -53,10 +49,12 @@ if (command === 'install') {
                 const dependencyCount = Object.keys(packageJson.dependencies || {}).length;
                 console.log(`${dependencyCount} dependencies installed...`);
             } catch (err) {
-                console.error('Error reading package.json:', err);
+                console.log('Error reading package.json:', err);
+                process.exit(1);
             }
         } else {
-            console.error(`npm install failed with code ${code}.`);
+            console.log(`npm install failed with code ${code}.`);
+            process.exit(1);
         }
     });
 
@@ -65,7 +63,8 @@ if (command === 'install') {
         // Logic for test command
         exec('npm test', (error, stdout, stderr) => {
             if (error) {
-                throw new Error(`Failed to run tests. Error: ${error}`);
+                console.log(`Failed to run tests. Error: ${error}`);
+                process.exit(1);
             }
             const testMatch = stderr.match(/Tests:\s+(\d+)\s+passed,\s+(\d+)\s+total/);
             const coverageMatch = stdout.match(/All files\s+\|[^|]+\|[^|]+\|[^|]+\|([^|]+)\|/);
@@ -76,7 +75,8 @@ if (command === 'install') {
                 const coverage = Math.floor(parseFloat(coverageMatch[1].trim()));
                 console.log(`${passed}/${total} test cases passed. ${coverage}% line coverage achieved.`);
             } else {
-                throw new Error('Failed to extract test report data.');
+                console.log('Failed to extract test report data.');
+                process.exit(1);
             }
         });
     });
