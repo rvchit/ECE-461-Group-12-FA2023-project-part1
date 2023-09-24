@@ -29,7 +29,8 @@ async function license(url: string): Promise<number> {
 	const readme = Buffer.from(content, 'base64').toString('utf-8');
 	const licenseRegex = /licen[sc]e/gi;
 	const hasLicense = licenseRegex.test(readme);
-
+	logger.debug(`Checked for license keywords in README. Found: ${hasLicense}`);
+	
 	return hasLicense ? 1 : 0;
 }
 
