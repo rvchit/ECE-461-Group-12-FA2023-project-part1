@@ -7,12 +7,12 @@ const winston_1 = require("winston");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const LOG_LEVEL = process.env.LOG_LEVEL || '0';
-const LOG_FILE = process.env.LOG_FILE || './combined.log';
+const LOG_FILE = process.env.LOG_FILE;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 let winstonLogLevel;
 switch (LOG_LEVEL) {
     case '0':
-        winstonLogLevel = 'error';
+        winstonLogLevel = 'silent';
         break;
     case '1':
         winstonLogLevel = 'info';
@@ -21,7 +21,7 @@ switch (LOG_LEVEL) {
         winstonLogLevel = 'debug';
         break;
     default:
-        winstonLogLevel = 'error';
+        winstonLogLevel = 'silent';
 }
 const createModuleLogger = (moduleName) => {
     // Determine the appropriate transport based on the environment.
