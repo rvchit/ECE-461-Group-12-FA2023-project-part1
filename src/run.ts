@@ -81,8 +81,9 @@ if (command === 'install') {
         });
     });
 
-} else if (args.length >= 2 && typeof args[1] === 'string') {
-    const file = args[1];
+} else if (command && command.endsWith('.txt')) {
+    const file = command
+
     loadDependencies().then(async () => {
         const { getBusFactor } = await import('./busFactor');
         const { license } = await import('./license');

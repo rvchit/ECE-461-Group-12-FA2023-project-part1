@@ -55,6 +55,7 @@ function formatter(metric) {
 }
 const args = process.argv.slice(2);
 const command = args[0];
+//console.log("command", command);
 if (command === 'install') {
     // Logic for install command
     const child = (0, child_process_1.exec)('npm install');
@@ -98,8 +99,8 @@ else if (command === 'test') {
         });
     });
 }
-else if (args.length >= 2 && typeof args[1] === 'string') {
-    const file = args[1];
+else if (command && command.endsWith('.txt')) {
+    const file = command;
     loadDependencies().then(async () => {
         const { getBusFactor } = await Promise.resolve().then(() => __importStar(require('./busFactor')));
         const { license } = await Promise.resolve().then(() => __importStar(require('./license')));
