@@ -2,7 +2,7 @@
 //test license.ts
 import { license } from '../src/license';
 
-const githubURLFail = 'https://github.com/Rohit-kamath/ECE-461-Group-12-FA2023-project-part1';
+const githubURLFail = 'https://github.com/barchart/marketdata-api-js';
 const githubURLSucceed = 'https://github.com/cloudinary/cloudinary_npm';
 
 //test to see if license.ts returns 0 for githubURLFail

@@ -62,7 +62,7 @@ async function rampUp(url: string): Promise<number> {
 
 		return score;
 	} catch (error) {
-		logger.error('Error in rampUp function', error);
+		logger.info('Error in rampUp function', error);
 		return score;
 	}
 }

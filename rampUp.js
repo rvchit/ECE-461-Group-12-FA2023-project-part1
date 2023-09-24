@@ -57,7 +57,7 @@ async function rampUp(url) {
         return score;
     }
     catch (error) {
-        logger.error('Error in rampUp function', error);
+        logger.info('Error in rampUp function', error);
         return score;
     }
 }

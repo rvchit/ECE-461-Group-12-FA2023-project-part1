@@ -13,13 +13,13 @@ dotenv_1.default.config();
 async function fetchContributors(fullRepoUrl) {
     logger.info(`Fetching contributors for repo: ${fullRepoUrl}`);
     const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
-    if (!repoUrlMatch) {
-        logger.error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
+    if (!repoUrlMatch || repoUrlMatch.length < 2 || repoUrlMatch === null) {
+        logger.info(`Invalid GitHub repository URL: ${fullRepoUrl}`);
         console.log(`Invalid GitHub repository URL: ${fullRepoUrl}`);
         process.exit(1);
     }
     const repoUrl = repoUrlMatch[1];
-    const apiUrl = `https://api.github.com/repos/${repoUrl}/contributors`;
+    const apiUrl = `https://api.github.com/repos/${repoUrlMatch[1]}/contributors`;
     logger.info(`Constructed API URL: ${apiUrl}`);
     const response = await (0, node_fetch_1.default)(apiUrl, {
         headers: {
@@ -28,7 +28,7 @@ async function fetchContributors(fullRepoUrl) {
         },
     });
     if (!response.ok) {
-        logger.error(`Failed to fetch contributors from ${repoUrl}. Status: ${response.statusText}`);
+        logger.info(`Failed to fetch contributors from ${repoUrl}. Status: ${response.statusText}`);
         console.log(`Failed to fetch contributors from ${repoUrl}. Status: ${response.statusText}`);
         process.exit(1);
     }
@@ -37,12 +37,12 @@ async function fetchContributors(fullRepoUrl) {
         data = await response.json();
     }
     catch (err) {
-        logger.error(`Failed to parse response from ${repoUrl}. Status: ${response.statusText}`);
+        logger.info(`Failed to parse response from ${repoUrl}. Status: ${response.statusText}`);
         console.log(`Failed to parse response from ${repoUrl}. Status: ${response.statusText}`);
         process.exit(1);
     }
     if (!Array.isArray(data) || !data.every((d) => 'login' in d && 'contributions' in d)) {
-        logger.error(`Expected an array of contributors but received a different type.`);
+        logger.info(`Expected an array of contributors but received a different type.`);
         console.log(`Expected an array of contributors but received a different type.`);
         process.exit(1);
     }
