@@ -8,7 +8,6 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const LOG_LEVEL = process.env.LOG_LEVEL || '0';
 const LOG_FILE = process.env.LOG_FILE;
-const NODE_ENV = process.env.NODE_ENV || 'development';
 let winstonLogLevel;
 switch (LOG_LEVEL) {
     case '0':
@@ -26,14 +25,7 @@ switch (LOG_LEVEL) {
 const createModuleLogger = (moduleName) => {
     // Determine the appropriate transport based on the environment.
     const selectedTransports = [];
-    if (NODE_ENV === 'test') {
-        selectedTransports.push(new winston_1.transports.Console({
-            format: winston_1.format.combine(winston_1.format.colorize(), winston_1.format.printf(({ timestamp, level, message }) => `${timestamp} ${level} [${moduleName}]: ${message}`))
-        }));
-    }
-    else {
-        selectedTransports.push(new winston_1.transports.File({ filename: LOG_FILE }));
-    }
+    selectedTransports.push(new winston_1.transports.File({ filename: LOG_FILE }));
     return (0, winston_1.createLogger)({
         level: winstonLogLevel,
         format: winston_1.format.combine(winston_1.format.timestamp({

@@ -14,7 +14,6 @@ export async function fetchGitHubData(fullRepoUrl: string, endpoint: string): Pr
 		console.log(`Invalid GitHub repository URL: ${fullRepoUrl}`);
 		process.exit(1);
 	}
-
 	const repoUrl = repoUrlMatch[1];
 	const apiUrl = `https://api.github.com/${endpoint.replace('OWNER/REPO', repoUrl)}`;
 

@@ -14,8 +14,10 @@ async function fetchGitHubData(fullRepoUrl, endpoint) {
     const repoUrlMatch = fullRepoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
     if (!repoUrlMatch) {
         logger.error(`Invalid GitHub repository URL:', ${fullRepoUrl}`);
-        throw new Error(`Invalid GitHub repository URL: ${fullRepoUrl}`);
+        console.log(`Invalid GitHub repository URL: ${fullRepoUrl}`);
+        process.exit(1);
     }
+    console.log(repoUrlMatch);
     const repoUrl = repoUrlMatch[1];
     const apiUrl = `https://api.github.com/${endpoint.replace('OWNER/REPO', repoUrl)}`;
     logger.info(`Constructed API URL: ${apiUrl}`);
@@ -27,7 +29,8 @@ async function fetchGitHubData(fullRepoUrl, endpoint) {
     });
     if (!response.ok) {
         logger.error(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
-        throw new Error(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
+        console.log(`Failed to fetch data from ${repoUrl}. Status: ${response.statusText}`);
+        process.exit(1);
     }
     return await response.json();
 }
@@ -37,7 +40,8 @@ async function fetchCorrectnessData(repoUrl) {
         const repoUrlMatch = repoUrl.match(/github\.com\/([\w-]+\/[\w-]+)/);
         if (!repoUrlMatch) {
             logger.error(`Invalid GitHub repository URL: ${repoUrl}`);
-            throw new Error(`Invalid GitHub repository URL: ${repoUrl}`);
+            console.log(`Invalid GitHub repository URL: ${repoUrl}`);
+            process.exit(1);
         }
         const repoPath = repoUrlMatch[1];
         const repoDetails = await fetchGitHubData(repoUrl, `repos/${repoPath}`);
@@ -57,12 +61,13 @@ async function fetchCorrectnessData(repoUrl) {
     catch (error) {
         if (error instanceof Error) {
             logger.error(`Failed to fetch correctness data: ${error.message}`);
-            throw new Error(`Failed to fetch correctness data: ${error.message}`);
+            console.log(`Failed to fetch correctness data: ${error.message}`);
         }
         else {
             logger.error('An unknown error occurred while fetching correctness data');
-            throw new Error('An unknown error occurred while fetching correctness data');
+            console.log('An unknown error occurred while fetching correctness data');
         }
+        process.exit(1);
     }
 }
 exports.fetchCorrectnessData = fetchCorrectnessData;

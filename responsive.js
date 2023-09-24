@@ -26,7 +26,8 @@ async function fetchIssues(owner, repo) {
     });
     if (!response.ok) {
         logger.error(`Failed to fetch data from ${repo}. Status: ${response.statusText}`);
-        throw new Error(`Failed to fetch data from ${repo}. Status: ${response.statusText}`);
+        console.log(`Failed to fetch data from ${repo}. Status: ${response.statusText}`);
+        process.exit(1);
     }
     const closedIssues = await response.json();
     return closedIssues;
@@ -75,8 +76,8 @@ async function responsive(url) {
     }
     catch (error) {
         logger.error(`Failed to calculate score of ${repo}. Error: ${error}`);
-        console.error(`Failed to calculate score of ${repo}. Error: ${error}`);
-        throw error;
+        console.log(`Failed to calculate score of ${repo}. Error: ${error}`);
+        process.exit(1);
     }
 }
 exports.responsive = responsive;
